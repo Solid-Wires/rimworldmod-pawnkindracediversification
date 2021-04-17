@@ -6,6 +6,7 @@
 		<li>1.2</li>
 	</supportedVersions>
 	<packageId>solidwires.pawnkindracediversification</packageId>
+	<url>https://github.com/Solid-Wires/rimworldmod-pawnkindracediversification</url>
   	<description>
 Fixes an inherent flaw with the pawnkind system where the race values are too strict. Allows other races to fit into place of other pawnkinds, so that you see them more often. Modders will no longer have to create a pawnkind and a faction for every single race with existing similar instances, and instead they can have a general weighted distribution list for those and everywhere.
 Though made as a tool for modders, you too can adjust weight distributions in the mod settings, even per world and during your save!
