@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  	<name>Pawnkind Race Diversification</name>
+  	<author>Solid E. Wires</author>
+    <supportedVersions>
+		<li>1.2</li>
+	</supportedVersions>
+	<packageId>solidwires.pawnkindracediversification</packageId>
+  	<description>
+Fixes an inherent flaw with the pawnkind system where the race values are too strict. Allows other races to fit into place of other pawnkinds, so that you see them more often. Modders will no longer have to create a pawnkind and a faction for every single race with existing similar instances, and instead they can have a general weighted distribution list for those and everywhere.
+Though made as a tool for modders, you too can adjust weight distributions in the mod settings, even per world and during your save!
+	</description>
+	<modDependencies>
+		<li>
+			<packageId>unlimitedhugs.hugslib</packageId>
+			<displayName>HugsLib</displayName>
+			<steamWorkshopUrl>https://steamcommunity.com/sharedfiles/filedetails/?id=818773962</steamWorkshopUrl>
+			<downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/download/v1.0.0/Harmony.zip</downloadUrl>
+		</li>
+		<li>
+			<packageId>erdelf.humanoidalienraces</packageId>
+			<displayName>Humanoid Alien Races 2.0</displayName>
+			<steamWorkshopUrl>https://steamcommunity.com/sharedfiles/filedetails/?id=839005762</steamWorkshopUrl>
+		</li>
+	</modDependencies>
+	<loadAfter>
+		<li>Ludeon.RimWorld</li>
+		<li>unlimitedhugs.hugslib</li>
+		<li>erdelf.humanoidalienraces</li>
+    </loadAfter>
+</ModMetaData>

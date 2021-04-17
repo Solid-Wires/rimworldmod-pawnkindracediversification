@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+
+	<PawnkindRaceDiversity_Settings_category>Pawnkind Race Diversity</PawnkindRaceDiversity_Settings_category>
+	<PawnkindRaceDiversity_Category_ShowDropdownSettings>Show settings</PawnkindRaceDiversity_Category_ShowDropdownSettings>
+	
+	<PawnkindRaceDiversity_OverrideAllHumanPawnkinds_label>Override all human pawnkinds</PawnkindRaceDiversity_OverrideAllHumanPawnkinds_label>
+	<PawnkindRaceDiversity_OverrideAllHumanPawnkinds_description>Allows the random race weight selection procedure to override the races of pawnkinds that were originally hardcoded as humans. Defaults to true.</PawnkindRaceDiversity_OverrideAllHumanPawnkinds_description>
+	<PawnkindRaceDiversity_OverrideAllAlienPawnkinds_label>Override all alien pawnkinds</PawnkindRaceDiversity_OverrideAllAlienPawnkinds_label>
+	<PawnkindRaceDiversity_OverrideAllAlienPawnkinds_description>Allows the random race weight selection procedure to override the races of pawnkinds that were originally hardcoded as certain alien races. Defaults to false.</PawnkindRaceDiversity_OverrideAllAlienPawnkinds_description>
+	
+	<PawnkindRaceDiversity_FlatWeightsGlobal_Category_label>Adjust flat weights (global)</PawnkindRaceDiversity_FlatWeightsGlobal_Category_label>
+	<PawnkindRaceDiversity_FlatWeightsPerWorldGen_Category_label>Adjust flat weights (per world gen)</PawnkindRaceDiversity_FlatWeightsPerWorldGen_Category_label>
+	<PawnkindRaceDiversity_FlatWeightsLocal_Category_label>Adjust flat weights (local save)</PawnkindRaceDiversity_FlatWeightsLocal_Category_label>
+	<PawnkindRaceDiversity_FlatWeights_Category_description>These weights influence the chance of any pawn becoming a certain race. Set negative to ignore the weight setting, leaving it to the discretion of the mod author. Set any value between 0.0 - 1.0 to determine the weighted chance of the race appearing.</PawnkindRaceDiversity_FlatWeights_Category_description>
+	<PawnkindRaceDiversity_FlatWeightsPerWorldGen_Category_description>Sets local save data of flat weights for new worlds you generate. If you want to start a world with specific aliens, modify this setting. However, if you want to adjust local save data after world gen, set these values to -1. This setting resets all values on every load to -1.</PawnkindRaceDiversity_FlatWeightsPerWorldGen_Category_description>
+	<PawnkindRaceDiversity_FlatWeightsLocal_Category_description>Sets local save data of weights in the current world you have loaded. Useful if you want to be very picky of what races you want to appear in the game. You can only adjust this setting while loaded in a save.</PawnkindRaceDiversity_FlatWeightsLocal_Category_description>
+	
+	<PawnkindRaceDiversity_FlatWeightsLocal_CategoryCannotOpenNoSave_label>Cannot show (no save loaded)</PawnkindRaceDiversity_FlatWeightsLocal_CategoryCannotOpenNoSave_label>
+	<PawnkindRaceDiversity_FlatWeightsLocal_CategoryCannotOpenInSave_label>Cannot show (save is loaded)</PawnkindRaceDiversity_FlatWeightsLocal_CategoryCannotOpenInSave_label>
+	
+</LanguageData>
