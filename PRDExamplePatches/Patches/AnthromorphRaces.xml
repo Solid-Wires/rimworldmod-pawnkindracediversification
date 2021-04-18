@@ -133,9 +133,9 @@
 				<li Class="PatchOperationRemove">
 					<xpath>*/PawnKindDef
 					[
-						race="ATK_Tribal_Totem_Felinemorph" or 
-						race="ATK_Tribal_Totem_Dragomorph" or 
-						race="ATK_Tribal_Totem_Caninemorph"
+						defName="ATK_Tribal_Totem_Felinemorph" or 
+						defName="ATK_Tribal_Totem_Dragomorph" or 
+						defName="ATK_Tribal_Totem_Caninemorph"
 					]</xpath>
 				</li>
 				<!-->
