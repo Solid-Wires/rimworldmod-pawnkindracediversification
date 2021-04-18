@@ -14,12 +14,15 @@
 				<-->
 				<li Class="PatchOperationRemove">
 					<xpath>*/AlienRace.RaceSettings/pawnKindSettings/alienslavekinds</xpath>
+					<success>Always</success>
 				</li>
 				<li Class="PatchOperationRemove">
 					<xpath>*/AlienRace.RaceSettings/pawnKindSettings/alienrefugeekinds</xpath>
+					<success>Always</success>
 				</li>
 				<li Class="PatchOperationRemove">
 					<xpath>*/AlienRace.RaceSettings/pawnKindSettings/startingColonists</xpath>
+					<success>Always</success>
 				</li>
 				<!-->
 					Usually, race modders will use "alienwandererkinds" as a way for your
@@ -34,6 +37,7 @@
 						text()="PlayerColony" or 
 						text()="PlayerTribe"
 					]</xpath>
+					<success>Always</success>
 				</li>
 			</operations>
 		</match>
