@@ -20,6 +20,16 @@ namespace PawnkindRaceDiversification
         internal static Harmony harmony => new Harmony("SEW_PRD_Harmony");
         internal static ModSettingsWorldStorage worldSettings = null;
         internal ModSettingsHandler SettingsHandler { get; private set; }
+        internal static List<SeekedMod> activeSeekedMods = new List<SeekedMod>();
+        internal enum SeekedMod
+        {
+            NONE,
+            PAWNMORPHER
+        }
+        private static Dictionary<string, SeekedMod> seekedModAssemblies = new Dictionary<string, SeekedMod>()
+        {
+            { "Pawnmorph", SeekedMod.PAWNMORPHER }
+        };
 
         public const bool DEBUG_MODE = false;
 
@@ -57,21 +67,60 @@ namespace PawnkindRaceDiversification
 
         private PawnkindRaceDiversification() => Instance = this;
 
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            //Find all active mods that this mod seeks.
+            List<Assembly> mods = HugsLibUtility.GetAllActiveAssemblies().ToList();
+            foreach (Assembly m in mods)
+            {
+                SeekedMod modFound = SeekedMod.NONE;
+                bool successful = seekedModAssemblies.TryGetValue(m.GetName().Name, out modFound);
+                if (successful)
+                    activeSeekedMods.Add(modFound);
+            }
+        }
+
         public override void DefsLoaded()
         {
             base.DefsLoaded();
             if (ModIsActive)
             {
                 //Finds def of all races currently loaded (courtesy goes to DubWise)
+                //  Also selects race settings to cherry pick a few things off of it
+                //  and looks through all loaded pawnkind defs to reassign its defaults after modifying them at runtime.
                 List<string> raceNames = new List<string>();
                 List<ThingDef_AlienRace> alienRaceDefs = (from x in DefDatabase<ThingDef_AlienRace>.AllDefs
                                                           where x.race != null
                                                           select x).ToList();
+                List<RaceSettings> raceSettingsDefs = (from x in DefDatabase<RaceSettings>.AllDefs
+                                                            select x).ToList();
                 List<PawnKindDef> kindDefs = (from x in DefDatabase<PawnKindDef>.AllDefs
                                               select x).ToList();
                 //Search through all alien race defs
                 foreach (ThingDef_AlienRace def in alienRaceDefs)
                 {
+                    //Know the file name of the def, this helps a lot sometimes
+                    string fileName = "";
+                    if (def.fileName.Contains('.'))
+                        fileName = def.fileName.Substring(0, def.fileName.IndexOf('.'));
+                    else
+                        fileName = def.fileName;
+
+                    //Pawnmorpher compatibility
+                    if (activeSeekedMods.Contains(SeekedMod.PAWNMORPHER))
+                    {
+                        //Implied defs are automatically skipped...
+                        //  Y'know, it would be a lot of work to patch ALL that author's implied defs!
+                        if (fileName == "ImpliedDefs"
+                         || fileName == "Cobra_Hybrid")
+                        {
+                            ExtensionDatabase.impliedRacesLoaded.Add(def.defName);
+                            continue;
+                        }
+                    }
+
                     //Add this race to the database
                     raceNames.Add(def.defName);
                     ExtensionDatabase.racesLoaded.Add(def.defName, def);
@@ -87,6 +136,31 @@ namespace PawnkindRaceDiversification
                         //Logger.Message("Def loaded: " + def.defName + ", extension values logged after");
                         //LogValues(ext.factionWeights[0].faction.defName, ext.pawnKindWeights[0].pawnkind.defName, ext.flatGenerationWeight);
                     }
+                }
+                //Remove irrelevant race settings
+                foreach (RaceSettings s in raceSettingsDefs)
+                {
+                    s.pawnKindSettings.alienslavekinds = null;
+                    s.pawnKindSettings.alienrefugeekinds = null;
+                    List<FactionPawnKindEntry> startingColonistEntries = (from w in s.pawnKindSettings.startingColonists
+                                                            where w.factionDefs.Count > 0
+                                                            select w).ToList(); ;
+                    List<FactionPawnKindEntry> wandererEntries = (from w in s.pawnKindSettings.alienwandererkinds
+                                                          where w.factionDefs.Count > 0
+                                                         select w).ToList();
+                    /*  So I didn't completely remove these race settings for two reasons:
+                     *      1.) Some race mods want these so that they have different pawnkind varieties for their
+                     *          specific faction races.
+                     *      2.) It would be destructive and barbaric to assume that ALL race mods bother the player
+                     *          colony factions.
+                     *  Therefore, all this does is remove the player factions from race settings that try to
+                     *  modify it. Settings without factions specified don't do anything (therefore, this is a
+                     *  safe procedure).
+                     * */
+                    foreach (FactionPawnKindEntry e in startingColonistEntries)
+                        e.factionDefs.RemoveAll(f => (f.defName == "PlayerColony" || f.defName == "PlayerTribe"));
+                    foreach (FactionPawnKindEntry e in wandererEntries)
+                        e.factionDefs.RemoveAll(f => (f.defName == "PlayerColony" || f.defName == "PlayerTribe"));
                 }
                 //Look through all existing pawnkind defs
                 foreach (PawnKindDef def in kindDefs)

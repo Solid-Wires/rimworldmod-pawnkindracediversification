@@ -18,8 +18,10 @@ namespace PawnkindRaceDiversification.Patches
             /*Precautions taken:
              *  1.) kindDef isn't null
              *  2.) kindDef is a humanlike
-             *  3.) kindDef isn't an excluded race def
-             *  4.) kindDef is human and settings want to override all human pawnkinds
+             *  3.) kindDef isn't an excluded kind def
+             *  4.) raceDef isn't an implied race (pawnmorpher compatibility)
+             *  5.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
+             *  6.) kindDef is human and settings want to override all human pawnkinds
              *      OR  kindDef isn't human and settings want to override all alien pawnkinds.
              * */
             PawnKindDef kindDef = request.KindDef;
@@ -27,6 +29,8 @@ namespace PawnkindRaceDiversification.Patches
             if (kindDef != null
               && kindDef.RaceProps.Humanlike
               && !(pawnKindDefsExcluded.Contains(kindDef))
+              && !(impliedRacesLoaded.Contains(kindDef.race.defName))
+              && !(faction != null && (faction.def.defName == "PawnmorpherPlayerColony" || faction.def.defName == "PawnmorpherEnclave"))
               && ((kindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
               || (kindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds)))
             {
