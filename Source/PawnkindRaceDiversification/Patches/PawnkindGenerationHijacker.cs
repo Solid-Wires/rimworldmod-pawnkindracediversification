@@ -68,8 +68,12 @@ namespace PawnkindRaceDiversification.Patches
                     factionWeight = data.Value.factionWeights.Find(f => f.factionDef == faction.defName);
                 float fw = factionWeight != null ? factionWeight.weight : 0.0f;
                 //Negative value would mean that this pawn shouldn't generate with this faction.
-                //  Return the original race.
-                if (fw < 0.0f) return pawnKind.race;
+                //  Skip this race.
+                if (fw < 0.0f)
+                {
+                    determinedWeights.Remove(data.Key);
+                    continue;
+                }
                 determinedWeights.SetOrAdd(data.Key, fw);
 
                 //Pawnkind weight
@@ -78,8 +82,12 @@ namespace PawnkindRaceDiversification.Patches
                     pawnkindWeight = data.Value.pawnKindWeights.Find(p => p.pawnKindDef == pawnKind.defName);
                 float pw = pawnkindWeight != null ? pawnkindWeight.weight : 0.0f;
                 //Negative value would mean that this pawn shouldn't generate as this pawnkind.
-                //  Return the original race.
-                if (pw < 0.0f) return pawnKind.race;
+                //  Skip this race.
+                if (pw < 0.0f)
+                {
+                    determinedWeights.Remove(data.Key);
+                    continue;
+                }
                 determinedWeights.SetOrAdd(data.Key, pw + fw);
 
                 //Flat generation weight
