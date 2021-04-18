@@ -33,7 +33,7 @@ namespace PawnkindRaceDiversification.Handlers
             {
                 float defaultValue = -1f;
                 if (race.ToLower() == "human")
-                    defaultValue = 0.1f;
+                    defaultValue = 0.35f;
 
                 SettingHandle<float> handle = pack.GetHandle<float>("flatGenerationWeight_" + race, race, null, defaultValue, Validators.FloatRangeValidator(-1f, 1.0f), null);
                 handle.VisibilityPredicate = () => this.globalFlatWeightsShown;
