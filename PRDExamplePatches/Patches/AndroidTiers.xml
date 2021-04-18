@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+	<Operation Class="PatchOperationFindMod">
+		<mods>
+			<li>Android tiers</li>
+		</mods>
+		<match Class="PatchOperationSequence">
+			<operations>
+				<!-->
+					Prevents these androids from being overwritten
+					(since they typically represent an android colony or a fabricated droid)
+				<-->
+				<li Class="PatchOperationConditional">
+					<xpath>*/PawnKindDef
+					[
+						defName="AndroidT5Colonist" or 
+						defName="AndroidT4Colonist" or 
+						defName="AndroidT3Colonist" or 
+						defName="AndroidT2Colonist" or 
+						defName="AndroidT1Colonist"
+					]/modExtensions</xpath>
+					<match Class="PatchOperationConditional">
+						<xpath>*/PawnKindDef[
+							defName="AndroidT5Colonist" or 
+							defName="AndroidT4Colonist" or 
+							defName="AndroidT3Colonist" or 
+							defName="AndroidT2Colonist" or 
+							defName="AndroidT1Colonist"
+						]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+						<nomatch Class="PatchOperationAdd">
+							<xpath>*/PawnKindDef[
+								defName="AndroidT5Colonist" or 
+								defName="AndroidT4Colonist" or 
+								defName="AndroidT3Colonist" or 
+								defName="AndroidT2Colonist" or 
+								defName="AndroidT1Colonist"
+							]/modExtensions</xpath>
+							<value>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceRandomizationExcluded"/>
+							</value>
+						</nomatch>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/PawnKindDef[
+							defName="AndroidT5Colonist" or 
+							defName="AndroidT4Colonist" or 
+							defName="AndroidT3Colonist" or 
+							defName="AndroidT2Colonist" or 
+							defName="AndroidT1Colonist"
+						]</xpath>
+						<value>
+							<modExtensions>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceRandomizationExcluded"/>
+							</modExtensions>
+						</value>
+					</nomatch>
+				</li>
+				
+				<!-->
+					Prevents the M7 Mech from being modifiable,
+					in case you don't want mechs running around!
+				<-->
+				<li Class="PatchOperationConditional">
+					<xpath>*/AlienRace.ThingDef_AlienRace[defName="M7Mech"]/modExtensions</xpath>
+					<match Class="PatchOperationConditional">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="M7Mech"]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+						<nomatch Class="PatchOperationAdd">
+							<xpath>*/AlienRace.ThingDef_AlienRace[defName="M7Mech"]/modExtensions</xpath>
+							<value>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>-1</flatGenerationWeight>
+								</li>
+							</value>
+						</nomatch>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="M7Mech"]</xpath>
+						<value>
+							<modExtensions>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>-1</flatGenerationWeight>
+								</li>
+							</modExtensions>
+						</value>
+					</nomatch>
+				</li>
+			</operations>
+		</match>
+	</Operation>
+</Patch>

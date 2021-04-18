@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+	<Operation Class="PatchOperationFindMod">
+		<mods>
+			<li>Xenohumans - Anthromorphs</li>
+		</mods>
+		<match Class="PatchOperationSequence">
+			<operations>
+				<!-->
+					Adds this mod extension to this race
+					This is an example for adding to the race pool
+					
+					ALTHOUGH - You do not have to check for the mod extension
+					if you are the modder that is modifying your own mod's
+					race. I'm just doing a conditional patch here so that
+					I don't accidently overwrite your values.
+				<-->
+				<!-->
+				<li Class="PatchOperationConditional">
+					<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Felinemorph"]/modExtensions</xpath>
+					<match Class="PatchOperationConditional">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Felinemorph"]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+						<nomatch Class="PatchOperationAdd">
+							<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Felinemorph"]/modExtensions</xpath>
+							<value>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<factionWeights>
+										<li>
+											<faction>TribeCivil</faction>
+											<weight>0.6</weight>
+										</li>
+									</factionWeights>
+									<pawnKindWeights>
+										<li>
+											<pawnkind>Drifter</pawnkind>
+											<weight>0.6</weight>
+										</li>
+									</pawnKindWeights>
+									<flatGenerationWeight>0.1</flatGenerationWeight>
+								</li>
+							</value>
+						</nomatch>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Felinemorph"]</xpath>
+						<value>
+							<modExtensions>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<factionWeights>
+										<li>
+											<factionDef>TribeCivil</factionDef>
+											<weight>0.6</weight>
+										</li>
+									</factionWeights>
+									<pawnKindWeights>
+										<li>
+											<pawnKindDef>Drifter</pawnKindDef>
+											<weight>0.6</weight>
+										</li>
+									</pawnKindWeights>
+									<flatGenerationWeight>0.1</flatGenerationWeight>
+								</li>
+							</modExtensions>
+						</value>
+					</nomatch>
+				</li>
+				<-->
+				
+				<!-->
+					If you don't want a certain pawnkind to be affected,
+					then patch in this component below.
+					It acts as a tag that this mod recognizes, which
+					prevents these pawnkind races from being replaced.
+				<-->
+				<!-->
+				<li Class="PatchOperationConditional">
+					<xpath>*/PawnKindDef[defName="Drifter"]/modExtensions</xpath>
+					<match Class="PatchOperationConditional">
+						<xpath>*/PawnKindDef[defName="Drifter"]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+						<nomatch Class="PatchOperationAdd">
+							<xpath>*/PawnKindDef[defName="Drifter"]/modExtensions</xpath>
+							<value>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceRandomizationExcluded"/>
+							</value>
+						</nomatch>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/PawnKindDef[defName="Drifter"]</xpath>
+						<value>
+							<modExtensions>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceRandomizationExcluded"/>
+							</modExtensions>
+						</value>
+					</nomatch>
+				</li>
+				<-->
+				
+				<!-->
+					You can remove kindDefs that you see are redundant.
+					
+					...the chances for these races appearing will
+					multiply if their kinds generate anywhere other
+					than their faction.
+					
+					UNLESS that pawn has a faction that uses those
+					pawnkinds or those pawnkinds make sense for another
+					mechanical purpose (e.g. androids or children).
+					
+					HOWEVER, do NOT make the same mistake as I did below.
+					Removing the colonist defs of the races will delete any
+					colonists that were previously that pawnKind.
+					This applies to faction leaders and world pawns too.
+					Do NOT remove pawnKindDefs and load a previous save
+					unless you are absolutely SURE about what you're doing!
+					TLDR: your previous saves will become incompatible
+					if you delete certain race pawnKinds.
+					
+					Removing certain pawnKinds will also cause red error issues
+					with certain scenarios that set specific races with a faction!
+				<-->
+				<!-->
+				<li Class="PatchOperationRemove">
+					<xpath>*/PawnKindDef
+					[
+						race="ATK_Felinemorph" or 
+						race="ATK_Dragomorph" or 
+						race="ATK_Caninemorph" or 
+						race="ATK_Lagomorph" or 
+						race="ATK_Cervinemorph"
+					]</xpath>
+				</li>
+				<-->
+				<li Class="PatchOperationRemove">
+					<xpath>*/PawnKindDef
+					[
+						race="ATK_Tribal_Totem_Felinemorph" or 
+						race="ATK_Tribal_Totem_Dragomorph" or 
+						race="ATK_Tribal_Totem_Caninemorph"
+					]</xpath>
+				</li>
+				<!-->
+					To prevent red errors, you must remove the pawnkinds
+					from groups as well.
+				<-->
+				<li Class="PatchOperationRemove">
+					<xpath>*/FactionDef
+					[
+						@Name="TribeBase"
+					]/pawnGroupMakers/li/options/ATK_Tribal_Totem_Felinemorph
+					</xpath>
+				</li>
+				<li Class="PatchOperationRemove">
+					<xpath>*/FactionDef
+					[
+						@Name="TribeBase"
+					]/pawnGroupMakers/li/options/ATK_Tribal_Totem_Dragomorph
+					</xpath>
+				</li>
+				<li Class="PatchOperationRemove">
+					<xpath>*/FactionDef
+					[
+						@Name="TribeBase"
+					]/pawnGroupMakers/li/options/ATK_Tribal_Totem_Caninemorph
+					</xpath>
+				</li>
+				
+				<li Class="PatchOperationConditional">
+					<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Felinemorph"]/modExtensions</xpath>
+					<match Class="PatchOperationConditional">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Felinemorph"]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+						<nomatch Class="PatchOperationAdd">
+							<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Felinemorph"]/modExtensions</xpath>
+							<value>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>0.12</flatGenerationWeight>
+								</li>
+							</value>
+						</nomatch>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Felinemorph"]</xpath>
+						<value>
+							<modExtensions>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>0.12</flatGenerationWeight>
+								</li>
+							</modExtensions>
+						</value>
+					</nomatch>
+				</li>
+				<li Class="PatchOperationConditional">
+					<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Dragomorph"]/modExtensions</xpath>
+					<match Class="PatchOperationConditional">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Dragomorph"]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+						<nomatch Class="PatchOperationAdd">
+							<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Dragomorph"]/modExtensions</xpath>
+							<value>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>0.06</flatGenerationWeight>
+								</li>
+							</value>
+						</nomatch>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Dragomorph"]</xpath>
+						<value>
+							<modExtensions>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>0.06</flatGenerationWeight>
+								</li>
+							</modExtensions>
+						</value>
+					</nomatch>
+				</li>
+				<li Class="PatchOperationConditional">
+					<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Caninemorph"]/modExtensions</xpath>
+					<match Class="PatchOperationConditional">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Caninemorph"]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+						<nomatch Class="PatchOperationAdd">
+							<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Caninemorph"]/modExtensions</xpath>
+							<value>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>0.1</flatGenerationWeight>
+								</li>
+							</value>
+						</nomatch>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Caninemorph"]</xpath>
+						<value>
+							<modExtensions>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>0.1</flatGenerationWeight>
+								</li>
+							</modExtensions>
+						</value>
+					</nomatch>
+				</li>
+				<li Class="PatchOperationConditional">
+					<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Lagomorph"]/modExtensions</xpath>
+					<match Class="PatchOperationConditional">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Lagomorph"]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+						<nomatch Class="PatchOperationAdd">
+							<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Lagomorph"]/modExtensions</xpath>
+							<value>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>0.08</flatGenerationWeight>
+								</li>
+							</value>
+						</nomatch>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Lagomorph"]</xpath>
+						<value>
+							<modExtensions>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>0.08</flatGenerationWeight>
+								</li>
+							</modExtensions>
+						</value>
+					</nomatch>
+				</li>
+				<li Class="PatchOperationConditional">
+					<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Cervinemorph"]/modExtensions</xpath>
+					<match Class="PatchOperationConditional">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Cervinemorph"]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+						<nomatch Class="PatchOperationAdd">
+							<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Cervinemorph"]/modExtensions</xpath>
+							<value>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>0.08</flatGenerationWeight>
+								</li>
+							</value>
+						</nomatch>
+					</match>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/AlienRace.ThingDef_AlienRace[defName="ATK_Cervinemorph"]</xpath>
+						<value>
+							<modExtensions>
+								<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+									<flatGenerationWeight>0.08</flatGenerationWeight>
+								</li>
+							</modExtensions>
+						</value>
+					</nomatch>
+				</li>
+			</operations>
+		</match>
+	</Operation>
+</Patch>

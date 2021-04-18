@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  	<name>[Patches] Pawnkind Race Diversification</name>
+  	<author>Solid E. Wires</author>
+    <supportedVersions>
+		<li>1.2</li>
+	</supportedVersions>
+	<packageId>solidwires.pawnkindracediversification.patches</packageId>
+  	<description>
+Patches that I made for use with Pawnkind Race Diversification. This illustrates some examples of patches for modders who want to use this mod.
+
+!!!Load below all alien race mods!!!
+	</description>
+</ModMetaData>
