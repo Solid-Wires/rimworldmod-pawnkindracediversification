@@ -140,11 +140,21 @@ namespace PawnkindRaceDiversification
                 //Remove irrelevant race settings
                 foreach (RaceSettings s in raceSettingsDefs)
                 {
-                    s.pawnKindSettings.alienslavekinds = null;
-                    s.pawnKindSettings.alienrefugeekinds = null;
+                    //I was a complete buffoon for trying to remove these. Just made their chances 0% instead.
+                    List<PawnKindEntry> slaveKindEntries = (from w in s.pawnKindSettings.alienslavekinds
+                                                          where w.chance > 0
+                                                          select w).ToList();
+                    List<PawnKindEntry> refugeeKindEntries = (from w in s.pawnKindSettings.alienrefugeekinds
+                                                            where w.chance > 0
+                                                            select w).ToList();
+                    foreach (PawnKindEntry slaveKind in slaveKindEntries)
+                        slaveKind.chance = 0.0f;
+                    foreach (PawnKindEntry refugeeKind in refugeeKindEntries)
+                        refugeeKind.chance = 0.0f;
+
                     List<FactionPawnKindEntry> startingColonistEntries = (from w in s.pawnKindSettings.startingColonists
                                                             where w.factionDefs.Count > 0
-                                                            select w).ToList(); ;
+                                                            select w).ToList();
                     List<FactionPawnKindEntry> wandererEntries = (from w in s.pawnKindSettings.alienwandererkinds
                                                           where w.factionDefs.Count > 0
                                                          select w).ToList();
