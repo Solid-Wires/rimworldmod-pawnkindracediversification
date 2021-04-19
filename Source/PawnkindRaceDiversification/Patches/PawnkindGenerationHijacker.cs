@@ -35,7 +35,7 @@ namespace PawnkindRaceDiversification.Patches
               || (kindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds)))
             {
                 //Change this kindDef's race to the selected race temporarily.
-                request.KindDef.race = WeightedRaceSelectionProcedure(kindDef, faction.def);
+                request.KindDef.race = WeightedRaceSelectionProcedure(kindDef, faction);
                 //PawnkindRaceDiversification.Logger.Message("Race selected: " + request.KindDef.race.label);
             }
         }
@@ -50,7 +50,7 @@ namespace PawnkindRaceDiversification.Patches
                 request.KindDef.race = racesLoaded.TryGetValue(pawnKindRaceDefRelations.TryGetValue(request.KindDef));
         }
 
-        public static ThingDef WeightedRaceSelectionProcedure(PawnKindDef pawnKind, FactionDef faction)
+        public static ThingDef WeightedRaceSelectionProcedure(PawnKindDef pawnKind, Faction faction)
         {
             /*      Precedences for weights:
              *          1.) Flat weight (user settings per-save)
@@ -68,8 +68,8 @@ namespace PawnkindRaceDiversification.Patches
             {
                 //Faction weight
                 FactionWeight factionWeight = null;
-                if (data.Value.factionWeights != null)
-                    factionWeight = data.Value.factionWeights.Find(f => f.factionDef == faction.defName);
+                if (data.Value.factionWeights != null && faction != null)
+                    factionWeight = data.Value.factionWeights.Find(f => f.factionDef == faction.def.defName);
                 float fw = factionWeight != null ? factionWeight.weight : 0.0f;
                 //Negative value would mean that this pawn shouldn't generate with this faction.
                 //  Skip this race.
