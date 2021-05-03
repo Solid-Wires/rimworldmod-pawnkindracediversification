@@ -1,6 +1,7 @@
 ﻿using AlienRace;
 using System.Collections.Generic;
 using Verse;
+using RimWorld;
 
 namespace PawnkindRaceDiversification.Extensions
 {

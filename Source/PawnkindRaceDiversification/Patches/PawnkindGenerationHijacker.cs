@@ -21,7 +21,8 @@ namespace PawnkindRaceDiversification.Patches
              *  3.) kindDef isn't an excluded kind def
              *  4.) raceDef isn't an implied race (pawnmorpher compatibility)
              *  5.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
-             *  6.) kindDef is human and settings want to override all human pawnkinds
+             *  6.) Altered Carbon isn't trying to generate a pawn (Altered Carbon compatibility)
+             *  7.) kindDef is human and settings want to override all human pawnkinds
              *      OR  kindDef isn't human and settings want to override all alien pawnkinds.
              * */
             PawnKindDef kindDef = request.KindDef;
@@ -31,6 +32,7 @@ namespace PawnkindRaceDiversification.Patches
               && !(pawnKindDefsExcluded.Contains(kindDef))
               && !(impliedRacesLoaded.Contains(kindDef.race.defName))
               && !(faction != null && (faction.def.defName == "PawnmorpherPlayerColony" || faction.def.defName == "PawnmorpherEnclave"))
+              && !(AlteredCarbonGeneratedAPawn.didAlteredCarbonGeneratePawn)
               && ((kindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
               || (kindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds)))
             {
@@ -43,11 +45,16 @@ namespace PawnkindRaceDiversification.Patches
         {
             //Make sure that we don't completely override the race value in the pawnkind def.
             //  Set it back to what it originally was after making the pawn.
-            PawnKindDef kindDef = request.KindDef;
-            if (kindDef != null
-              && kindDef.RaceProps.Humanlike)
-                //Reset this kindDef's race after generating the pawn.
-                request.KindDef.race = racesLoaded.TryGetValue(pawnKindRaceDefRelations.TryGetValue(request.KindDef));
+            //  Does not do anything if the following mods made changes already.
+            if (!AlteredCarbonGeneratedAPawn.didAlteredCarbonGeneratePawn)
+            {
+                PawnKindDef kindDef = request.KindDef;
+                if (kindDef != null
+                  && kindDef.RaceProps.Humanlike)
+                    //Reset this kindDef's race after generating the pawn.
+                    request.KindDef.race = racesLoaded.TryGetValue(pawnKindRaceDefRelations.TryGetValue(request.KindDef));
+            }
+            AlteredCarbonGeneratedAPawn.didAlteredCarbonGeneratePawn = false;
         }
 
         public static ThingDef WeightedRaceSelectionProcedure(PawnKindDef pawnKind, Faction faction)

@@ -24,12 +24,15 @@ namespace PawnkindRaceDiversification
         internal enum SeekedMod
         {
             NONE,
-            PAWNMORPHER
+            PAWNMORPHER,
+            ALTERED_CARBON
         }
         private static Dictionary<string, SeekedMod> seekedModAssemblies = new Dictionary<string, SeekedMod>()
         {
-            { "Pawnmorph", SeekedMod.PAWNMORPHER }
+            { "Pawnmorph", SeekedMod.PAWNMORPHER },
+            { "AlteredCarbon", SeekedMod.ALTERED_CARBON}
         };
+        internal static Dictionary<SeekedMod, Assembly> referencedModAssemblies = new Dictionary<SeekedMod, Assembly>();
 
         public const bool DEBUG_MODE = false;
 
@@ -75,11 +78,16 @@ namespace PawnkindRaceDiversification
             List<Assembly> mods = HugsLibUtility.GetAllActiveAssemblies().ToList();
             foreach (Assembly m in mods)
             {
+                //Logger.Message(m.GetName().Name);
                 SeekedMod modFound = SeekedMod.NONE;
                 bool successful = seekedModAssemblies.TryGetValue(m.GetName().Name, out modFound);
                 if (successful)
+                {
                     activeSeekedMods.Add(modFound);
+                    referencedModAssemblies.Add(modFound, m);
+                }
             }
+            Patches.HarmonyPatches.PostInitPatches();
         }
 
         public override void DefsLoaded()

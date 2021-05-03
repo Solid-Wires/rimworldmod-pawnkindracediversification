@@ -19,7 +19,16 @@ namespace PawnkindRaceDiversification.Patches
             {
                 typeof(PawnGenerationRequest)
             }), typeof(PawnkindGenerationHijacker).GetMethod("DetermineRace"), typeof(PawnkindGenerationHijacker).GetMethod("AfterDeterminedRace"));
-
+        }
+        internal static void PostInitPatches()
+        {
+            if (PawnkindRaceDiversification.activeSeekedMods.Contains(PawnkindRaceDiversification.SeekedMod.ALTERED_CARBON))
+            {
+                //If this specific method is called, then Altered Carbon generated a pawn. We don't want to touch
+                //  this pawn.
+                Assembly a = PawnkindRaceDiversification.referencedModAssemblies[PawnkindRaceDiversification.SeekedMod.ALTERED_CARBON];
+                Patch(AccessTools.Method(a.GetTypes().First(t => t.Name == "CustomizeSleeveWindow"), "GetNewPawn"), typeof(AlteredCarbonGeneratedAPawn).GetMethod("OnAlteredCarbonGeneratePawn"));
+            }
         }
 
         //A more straightforward way to patch things.

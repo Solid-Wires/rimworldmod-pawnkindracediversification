@@ -74,6 +74,7 @@
     <Compile Include="Extensions\RaceRandomizationExcluded.cs" />
     <Compile Include="Extensions\PawnkindWeight.cs" />
     <Compile Include="Handlers\ModSettingsWorldStorage.cs" />
+    <Compile Include="Patches\AlteredCarbonGeneratedAPawn.cs" />
     <Compile Include="Patches\HarmonyPatches.cs" />
     <Compile Include="Patches\PawnkindGenerationHijacker.cs" />
     <Compile Include="PawnkindRaceDiversification.cs" />
