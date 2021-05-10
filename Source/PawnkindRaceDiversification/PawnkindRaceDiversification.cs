@@ -111,10 +111,13 @@ namespace PawnkindRaceDiversification
                 {
                     //Know the file name of the def, this helps a lot sometimes
                     string fileName = "";
-                    if (def.fileName.Contains('.'))
-                        fileName = def.fileName.Substring(0, def.fileName.IndexOf('.'));
-                    else
-                        fileName = def.fileName;
+                    if (def.fileName != null)
+                    {
+                        if (def.fileName.Contains('.'))
+                            fileName = def.fileName.Substring(0, def.fileName.IndexOf('.'));
+                        else
+                            fileName = def.fileName;
+                    }
 
                     //Pawnmorpher compatibility
                     if (activeSeekedMods.Contains(SeekedMod.PAWNMORPHER))
