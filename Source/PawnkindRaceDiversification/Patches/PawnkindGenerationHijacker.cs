@@ -10,6 +10,13 @@ namespace PawnkindRaceDiversification.Patches
 {
     public static class PawnkindGenerationHijacker
     {
+        //This can be set to true to prevent pawns from being generated with race weights.
+        private static bool weightGeneratorPaused = false;
+        public static void PauseWeightGeneration()
+        {
+            weightGeneratorPaused = true;
+        }
+
         //Harmony manual prefix method
         public static void DetermineRace(PawnGenerationRequest request)
         {
@@ -21,7 +28,7 @@ namespace PawnkindRaceDiversification.Patches
              *  3.) kindDef isn't an excluded kind def
              *  4.) raceDef isn't an implied race (pawnmorpher compatibility)
              *  5.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
-             *  6.) Altered Carbon isn't trying to generate a pawn (Altered Carbon compatibility)
+             *  6.) The weight generator isn't paused
              *  7.) kindDef is human and settings want to override all human pawnkinds
              *      OR  kindDef isn't human and settings want to override all alien pawnkinds.
              * */
@@ -32,7 +39,7 @@ namespace PawnkindRaceDiversification.Patches
               && !(pawnKindDefsExcluded.Contains(kindDef))
               && !(impliedRacesLoaded.Contains(kindDef.race.defName))
               && !(faction != null && (faction.def.defName == "PawnmorpherPlayerColony" || faction.def.defName == "PawnmorpherEnclave"))
-              && !(AlteredCarbonGeneratedAPawn.didAlteredCarbonGeneratePawn)
+              && !(weightGeneratorPaused)
               && ((kindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
               || (kindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds)))
             {
@@ -45,8 +52,8 @@ namespace PawnkindRaceDiversification.Patches
         {
             //Make sure that we don't completely override the race value in the pawnkind def.
             //  Set it back to what it originally was after making the pawn.
-            //  Does not do anything if the following mods made changes already.
-            if (!AlteredCarbonGeneratedAPawn.didAlteredCarbonGeneratePawn)
+            //  Does not do anything if the weight generator was paused before.
+            if (!weightGeneratorPaused)
             {
                 PawnKindDef kindDef = request.KindDef;
                 if (kindDef != null
@@ -54,7 +61,8 @@ namespace PawnkindRaceDiversification.Patches
                     //Reset this kindDef's race after generating the pawn.
                     request.KindDef.race = racesLoaded.TryGetValue(pawnKindRaceDefRelations.TryGetValue(request.KindDef));
             }
-            AlteredCarbonGeneratedAPawn.didAlteredCarbonGeneratePawn = false;
+            //Unpause the weight generator.
+            weightGeneratorPaused = false;
         }
 
         public static ThingDef WeightedRaceSelectionProcedure(PawnKindDef pawnKind, Faction faction)

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Collections.Generic;
 using PawnkindRaceDiversification.Extensions;
 using UnityEngine.SceneManagement;
+using PawnkindRaceDiversification.UI;
 
 namespace PawnkindRaceDiversification
 {
@@ -202,11 +203,6 @@ namespace PawnkindRaceDiversification
         {
             base.WorldLoaded();
             worldSettings = UtilityWorldObjectManager.GetUtilityWorldObject<ModSettingsWorldStorage>();
-        }
-        public override void SceneLoaded(Scene scene)
-        {
-            base.SceneLoaded(scene);
-            SettingsHandler.HideAllVolatileCategories();
         }
     }
 }

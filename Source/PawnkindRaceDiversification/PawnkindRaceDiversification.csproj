@@ -67,12 +67,23 @@
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\ExtensionDatabase.cs" />
     <Compile Include="Extensions\FactionWeight.cs" />
     <Compile Include="Extensions\RaceRandomizationExcluded.cs" />
     <Compile Include="Extensions\PawnkindWeight.cs" />
+    <Compile Include="UI\WeightAdjustmentWindow.cs" />
+    <Compile Include="UI\WeightSettingsWindow.cs" />
+    <Compile Include="Handlers\HandleContext.cs" />
     <Compile Include="Handlers\ModSettingsWorldStorage.cs" />
     <Compile Include="Patches\AlteredCarbonGeneratedAPawn.cs" />
     <Compile Include="Patches\HarmonyPatches.cs" />

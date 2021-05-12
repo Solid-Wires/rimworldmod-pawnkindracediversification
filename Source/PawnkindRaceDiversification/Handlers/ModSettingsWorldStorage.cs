@@ -10,7 +10,7 @@ namespace PawnkindRaceDiversification.Handlers
         {
             base.ExposeData();
             Scribe_Collections.Look(ref ModSettingsHandler.setLocalFlatWeights, "localFlatWeights", LookMode.Value, LookMode.Value);
-            foreach (SettingHandle<float> handle in ModSettingsHandler.localHandles)
+            foreach (SettingHandle<float> handle in ModSettingsHandler.allHandleReferences.FindAll(h => ModSettingsHandler.WhatContextIsID(h.Name) == HandleContext.LOCALS))
             {
                 float weight = -1f;
                 bool successful = ModSettingsHandler.setLocalFlatWeights.TryGetValue(handle.Title, out weight);
