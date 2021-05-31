@@ -26,12 +26,14 @@ namespace PawnkindRaceDiversification
         {
             NONE,
             PAWNMORPHER,
-            ALTERED_CARBON
+            ALTERED_CARBON,
+            PREPARE_CAREFULLY
         }
         private static Dictionary<string, SeekedMod> seekedModAssemblies = new Dictionary<string, SeekedMod>()
         {
             { "Pawnmorph", SeekedMod.PAWNMORPHER },
-            { "AlteredCarbon", SeekedMod.ALTERED_CARBON}
+            { "AlteredCarbon", SeekedMod.ALTERED_CARBON},
+            { "EdBPrepareCarefully", SeekedMod.PREPARE_CAREFULLY}
         };
         internal static Dictionary<SeekedMod, Assembly> referencedModAssemblies = new Dictionary<SeekedMod, Assembly>();
 

@@ -22,12 +22,37 @@ namespace PawnkindRaceDiversification.Patches
         }
         internal static void PostInitPatches()
         {
-            if (PawnkindRaceDiversification.activeSeekedMods.Contains(PawnkindRaceDiversification.SeekedMod.ALTERED_CARBON))
+            //Altered Carbon
+            ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.ALTERED_CARBON, "CustomizeSleeveWindow", "GetNewPawn", null,
+                typeof(AnyModGeneratedPawn).GetMethod("OnModGeneratedPawn"));
+            //Prepare Carefully
+            ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.PREPARE_CAREFULLY, "ColonistSaver", "SaveToFile", null,
+                null, null, typeof(PrepareCarefullyTweaks).GetMethod("SavingMethodInsertionTranspiler"));
+            ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.PREPARE_CAREFULLY, "ColonistLoader", "LoadFromFile", null,
+                null, null, typeof(PrepareCarefullyTweaks).GetMethod("LoadingMethodInsertionTranspiler"));
+            ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.PREPARE_CAREFULLY, "ExtensionsPawn", "Copy", null,
+                typeof(PrepareCarefullyTweaks).GetMethod("PawnPreCopy"), typeof(PrepareCarefullyTweaks).GetMethod("PawnPostCopy"));
+            ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.PREPARE_CAREFULLY, "CustomPawn", "InitializeWithPawn", null,
+                typeof(PrepareCarefullyTweaks).GetMethod("OnInitializeNewPawn"));
+        }
+
+        private static void ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod modToPatch, string className, string targetMethod, Type[] parameters = null,
+            MethodInfo prefixMethod = null, 
+            MethodInfo postfixMethod = null,
+            MethodInfo transpiler = null,
+            MethodInfo finalizer = null)
+        {
+            if (PawnkindRaceDiversification.activeSeekedMods.Contains(modToPatch))
             {
                 //If this specific method is called, then Altered Carbon generated a pawn. We don't want to touch
                 //  this pawn.
-                Assembly a = PawnkindRaceDiversification.referencedModAssemblies[PawnkindRaceDiversification.SeekedMod.ALTERED_CARBON];
-                Patch(AccessTools.Method(a.GetTypes().First(t => t.Name == "CustomizeSleeveWindow"), "GetNewPawn"), typeof(AlteredCarbonGeneratedAPawn).GetMethod("OnAlteredCarbonGeneratePawn"));
+                Assembly a = PawnkindRaceDiversification.referencedModAssemblies[modToPatch];
+                Patch(AccessTools.Method(a.GetTypes().First(t => t.Name == className), targetMethod, parameters), 
+                    prefixMethod, postfixMethod, transpiler, finalizer);
+            }
+            else
+            {
+                PawnkindRaceDiversification.Logger.Warning("Mod does not exist! - " + modToPatch.ToString());
             }
         }
 

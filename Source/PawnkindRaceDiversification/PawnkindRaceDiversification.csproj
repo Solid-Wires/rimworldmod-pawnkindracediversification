@@ -81,11 +81,12 @@
     <Compile Include="Extensions\FactionWeight.cs" />
     <Compile Include="Extensions\RaceRandomizationExcluded.cs" />
     <Compile Include="Extensions\PawnkindWeight.cs" />
+    <Compile Include="Patches\PrepareCarefullyTweaks.cs" />
     <Compile Include="UI\WeightAdjustmentWindow.cs" />
     <Compile Include="UI\WeightSettingsWindow.cs" />
     <Compile Include="Handlers\HandleContext.cs" />
     <Compile Include="Handlers\ModSettingsWorldStorage.cs" />
-    <Compile Include="Patches\AlteredCarbonGeneratedAPawn.cs" />
+    <Compile Include="Patches\AnyModGeneratedPawn.cs" />
     <Compile Include="Patches\HarmonyPatches.cs" />
     <Compile Include="Patches\PawnkindGenerationHijacker.cs" />
     <Compile Include="PawnkindRaceDiversification.cs" />

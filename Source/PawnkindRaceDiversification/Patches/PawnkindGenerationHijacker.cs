@@ -29,7 +29,8 @@ namespace PawnkindRaceDiversification.Patches
              *  4.) raceDef isn't an implied race (pawnmorpher compatibility)
              *  5.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
              *  6.) The weight generator isn't paused
-             *  7.) kindDef is human and settings want to override all human pawnkinds
+             *  7.) Prepare Carefully isn't doing anything
+             *  8.) kindDef is human and settings want to override all human pawnkinds
              *      OR  kindDef isn't human and settings want to override all alien pawnkinds.
              * */
             PawnKindDef kindDef = request.KindDef;
@@ -40,6 +41,7 @@ namespace PawnkindRaceDiversification.Patches
               && !(impliedRacesLoaded.Contains(kindDef.race.defName))
               && !(faction != null && (faction.def.defName == "PawnmorpherPlayerColony" || faction.def.defName == "PawnmorpherEnclave"))
               && !(weightGeneratorPaused)
+              && !(PrepareCarefullyTweaks.loadedAlienRace != "none")
               && ((kindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
               || (kindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds)))
             {
