@@ -173,8 +173,8 @@ namespace PawnkindRaceDiversification.Patches
             if (pawnkindDef.hairTags != null)
             {
                 List<string> loadedHairTags = raceHairTagData[pawnkindDef.race.defName];
-                if (loadedHairTags == null
-                    || loadedHairTags[0] == "nohair")
+                if (loadedHairTags.Count > 0
+                    && loadedHairTags[0] == "nohair")
                 {
                     prevPawnkindHairtags = pawnkindDef.hairTags;
                     pawnkindDef.hairTags = null;
