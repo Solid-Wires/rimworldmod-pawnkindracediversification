@@ -170,10 +170,13 @@ namespace PawnkindRaceDiversification.Patches
             //HAR does not handle hair generation for pawnkinds, therefore I will fix this myself.
             //  To revert to default behavior that HAR already does with factions, I can temporarily set
             //  the pawnkind hairtags to null in order to stop forced hair generation.
+            //Pawns that are allowed to have forced hair are pawns that already do spawn with hair.
+            //  However, pawns that are not supposed to spawn with hair should not have forced pawnkind hair gen.
             if (pawnkindDef.hairTags != null)
             {
                 List<string> loadedHairTags = raceHairTagData[pawnkindDef.race.defName];
-                if (loadedHairTags.Count > 0
+                if (loadedHairTags != null
+                    && loadedHairTags.Count > 0
                     && loadedHairTags[0] == "nohair")
                 {
                     prevPawnkindHairtags = pawnkindDef.hairTags;
