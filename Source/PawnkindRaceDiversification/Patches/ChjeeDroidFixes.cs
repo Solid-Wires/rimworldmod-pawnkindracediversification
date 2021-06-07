@@ -20,7 +20,6 @@ namespace PawnkindRaceDiversification.Patches
         {
             int ifStatement = -1;
             int ifStatementStart = -1;
-            int ifStatementEnd = -1;
 
             var codes = new List<CodeInstruction>(instructions);
 
@@ -34,7 +33,6 @@ namespace PawnkindRaceDiversification.Patches
                     && codes[i + 3].opcode == OpCodes.Ldloc_S)
                 {
                     ifStatementStart = i;
-                    ifStatementEnd = i + 8;
                 }
                 if (codes[i].opcode == OpCodes.Brfalse_S
                     && codes[i + 1].opcode == OpCodes.Nop
@@ -47,7 +45,6 @@ namespace PawnkindRaceDiversification.Patches
                 }
             }
             if (ifStatementStart > -1
-                && ifStatementEnd > -1
                 && ifStatement > -1)
             {
                 codes.Insert(ifStatementStart,

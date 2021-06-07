@@ -53,10 +53,6 @@ namespace PawnkindRaceDiversification.Patches
                 Patch(AccessTools.Method(a.GetTypes().First(t => t.Name == className), targetMethod, parameters), 
                     prefixMethod, postfixMethod, transpiler, finalizer);
             }
-            else
-            {
-                PawnkindRaceDiversification.Logger.Warning("Mod does not exist! - " + modToPatch.ToString());
-            }
         }
 
         //A more straightforward way to patch things.

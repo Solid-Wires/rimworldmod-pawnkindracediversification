@@ -14,7 +14,11 @@ namespace PawnkindRaceDiversification.Patches
         //This can be set to true to prevent pawns from being generated with race weights.
         private static bool weightGeneratorPaused = false;
         private static bool justGeneratedRace = false;
+        private static bool generatedBackstoryInfo = false;
         private static List<string> prevPawnkindHairtags = null;
+        private static List<BackstoryCategoryFilter> prevFactionBackstoryCategoryFilters = null;
+        private static List<string> prevPawnkindBackstoryCategories = null;
+        private static List<BackstoryCategoryFilter> prevPawnkindBackstoryCategoryFilters = null;
         public static void PauseWeightGeneration()
         {
             weightGeneratorPaused = true;
@@ -53,6 +57,8 @@ namespace PawnkindRaceDiversification.Patches
                 //Change this kindDef's race to the selected race temporarily.
                 request.KindDef.race = WeightedRaceSelectionProcedure(kindDef, faction);
                 HairFixProcedure(kindDef);
+                BackstoryInjectionProcedure(kindDef, faction.def);
+
                 justGeneratedRace = true;
                 IsPawnOfPlayerFaction = faction.IsPlayer;
                 //PawnkindRaceDiversification.Logger.Message("Selecting race...");
@@ -69,6 +75,15 @@ namespace PawnkindRaceDiversification.Patches
                 request.KindDef.race = racesLoaded.TryGetValue(pawnKindRaceDefRelations.TryGetValue(request.KindDef));
                 if (prevPawnkindHairtags != null)
                     request.KindDef.hairTags = prevPawnkindHairtags;
+                //Reset backstory-related lists
+                if (generatedBackstoryInfo)
+                {
+                    request.Faction.def.backstoryFilters = prevFactionBackstoryCategoryFilters.ListFullCopyOrNull();
+                    request.KindDef.backstoryCategories = prevPawnkindBackstoryCategories.ListFullCopyOrNull();
+                    request.KindDef.backstoryFilters = prevPawnkindBackstoryCategoryFilters.ListFullCopyOrNull();
+                    generatedBackstoryInfo = false;
+                }
+
                 justGeneratedRace = false;
                 IsPawnOfPlayerFaction = false;
                 //PawnkindRaceDiversification.Logger.Message("Race selected successfully.");
@@ -77,11 +92,15 @@ namespace PawnkindRaceDiversification.Patches
             weightGeneratorPaused = false;
             //Reset remembered pawnkind hair tags.
             prevPawnkindHairtags = null;
+            //Reset backstory-related things.
+            prevFactionBackstoryCategoryFilters = null;
+            prevPawnkindBackstoryCategories = null;
+            prevPawnkindBackstoryCategoryFilters = null;
         }
 
         public static ThingDef WeightedRaceSelectionProcedure(PawnKindDef pawnKind, Faction faction)
         {
-            /*      Precedences for weights:
+            /*      Precedences for weights (first-to-last):
              *          1.) Flat weight (user settings per-save)
              *              ~ World Load
              *          2.) Flat weight (user settings global)
@@ -188,6 +207,114 @@ namespace PawnkindRaceDiversification.Patches
                     prevPawnkindHairtags = pawnkindDef.hairTags;
                     pawnkindDef.hairTags = null;
                 }
+            }
+        }
+
+        private static void BackstoryInjectionProcedure(PawnKindDef pawnkindDef, FactionDef factionDef)
+        {
+            /*  Backstory precedences (first-to-last):
+             *      1.) Pawnkind backstories
+             *      2.) Faction backstories
+             *      3.) General backstories
+             */
+            string race = pawnkindDef.race.defName;
+            if (racesDiversified.ContainsKey(race))
+            {
+                //Back up the previous backstory information, so that we are not overriding it afterwards
+                if (factionDef != null)
+                    prevFactionBackstoryCategoryFilters = factionDef.backstoryFilters.ListFullCopyOrNull();
+                prevPawnkindBackstoryCategories = pawnkindDef.backstoryCategories.ListFullCopyOrNull();
+                prevPawnkindBackstoryCategoryFilters = pawnkindDef.backstoryFilters.ListFullCopyOrNull();
+
+                //Extension data
+                RaceDiversificationPool raceExtensionData = racesDiversified[race];
+                FactionWeight factionWeightData = null;
+                PawnkindWeight pawnkindWeightData = null;
+                if (factionDef != null && raceExtensionData.factionWeights != null)
+                    factionWeightData = raceExtensionData.factionWeights.FirstOrFallback(w => w.factionDef == factionDef.defName);
+                if (raceExtensionData.pawnKindWeights != null)
+                    pawnkindWeightData = raceExtensionData.pawnKindWeights.FirstOrFallback(w => w.pawnKindDef == pawnkindDef.defName);
+                
+
+                //Handled backstory data
+                List<string> backstoryCategories = new List<string>();
+                List<BackstoryCategoryFilter> backstoryPawnkindFilters = new List<BackstoryCategoryFilter>();
+                List<BackstoryCategoryFilter> backstoryFactionFilters = new List<BackstoryCategoryFilter>();
+                bool pawnkindBackstoryOverride = false;
+                bool factionBackstoryOverride = false;
+                bool addedOriginalPawnkindStuff = false;
+                bool addedOriginalFactionStuff = false;
+
+                //Procedure
+                if (pawnkindWeightData != null)
+                {
+                    if (pawnkindWeightData.backstoryCategories != null)
+                        backstoryCategories.AddRange(pawnkindWeightData.backstoryCategories);
+                    if (pawnkindWeightData.backstoryFilters != null)
+                        backstoryPawnkindFilters.AddRange(pawnkindWeightData.backstoryFilters);
+                    pawnkindBackstoryOverride = pawnkindWeightData.overrideBackstories;
+                    if (!pawnkindBackstoryOverride
+                    && !raceExtensionData.overrideBackstories)
+                    {
+                        if (pawnkindDef.backstoryCategories != null)
+                            backstoryCategories.AddRange(pawnkindDef.backstoryCategories);
+                        if (pawnkindDef.backstoryFilters != null)
+                            backstoryPawnkindFilters.AddRange(pawnkindDef.backstoryFilters);
+                        addedOriginalPawnkindStuff = true;
+                    }
+                }
+                if (factionDef != null
+                    && factionWeightData != null
+                    && !pawnkindBackstoryOverride)
+                {
+                    if (factionWeightData.backstoryCategories != null)
+                        backstoryCategories.AddRange(factionWeightData.backstoryCategories);
+                    if (factionWeightData.backstoryFilters != null)
+                        backstoryFactionFilters.AddRange(factionWeightData.backstoryFilters);
+                    factionBackstoryOverride = factionWeightData.overrideBackstories;
+                    if (!factionBackstoryOverride
+                    && !raceExtensionData.overrideBackstories)
+                    {
+                        if (factionDef.backstoryFilters != null)
+                            backstoryFactionFilters.AddRange(factionDef.backstoryFilters);
+                        addedOriginalFactionStuff = true;
+                    }
+                }
+                if ((raceExtensionData.backstoryCategories != null || raceExtensionData.backstoryFilters != null)
+                    && !pawnkindBackstoryOverride
+                    && !factionBackstoryOverride)
+                {
+                    if (raceExtensionData.backstoryCategories != null)
+                        backstoryCategories.AddRange(raceExtensionData.backstoryCategories);
+                    if (raceExtensionData.backstoryFilters != null)
+                        backstoryFactionFilters.AddRange(raceExtensionData.backstoryFilters);
+                }
+                else if ((raceExtensionData.backstoryCategories == null && raceExtensionData.backstoryFilters == null)
+                        && !pawnkindBackstoryOverride
+                        && !factionBackstoryOverride)
+                {
+                    if (!addedOriginalFactionStuff && !raceExtensionData.overrideBackstories)
+                    {
+                        if (pawnkindDef.backstoryCategories != null)
+                            backstoryCategories.AddRange(pawnkindDef.backstoryCategories);
+                        if (pawnkindDef.backstoryFilters != null)
+                            backstoryPawnkindFilters.AddRange(pawnkindDef.backstoryFilters);
+                        addedOriginalPawnkindStuff = true;
+                    }
+                    if (!addedOriginalPawnkindStuff && !raceExtensionData.overrideBackstories)
+                    {
+                        if (factionDef.backstoryFilters != null)
+                            backstoryFactionFilters.AddRange(factionDef.backstoryFilters);
+                        addedOriginalFactionStuff = true;
+                    }
+                }
+
+                //Assignment
+                if (factionDef != null)
+                    factionDef.backstoryFilters = backstoryFactionFilters;
+                pawnkindDef.backstoryCategories = backstoryCategories;
+                pawnkindDef.backstoryFilters = backstoryPawnkindFilters;
+                generatedBackstoryInfo = true;
             }
         }
     }
