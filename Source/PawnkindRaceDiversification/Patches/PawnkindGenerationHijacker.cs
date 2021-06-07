@@ -19,6 +19,8 @@ namespace PawnkindRaceDiversification.Patches
         {
             weightGeneratorPaused = true;
         }
+        public static bool DidRaceGenerate() => justGeneratedRace;
+        public static bool IsPawnOfPlayerFaction { get; private set; } = false;
 
         //Harmony manual prefix method
         public static void DetermineRace(PawnGenerationRequest request)
@@ -52,6 +54,8 @@ namespace PawnkindRaceDiversification.Patches
                 request.KindDef.race = WeightedRaceSelectionProcedure(kindDef, faction);
                 HairFixProcedure(kindDef);
                 justGeneratedRace = true;
+                IsPawnOfPlayerFaction = faction.IsPlayer;
+                //PawnkindRaceDiversification.Logger.Message("Selecting race...");
             }
         }
         public static void AfterDeterminedRace(PawnGenerationRequest request)
@@ -66,6 +70,8 @@ namespace PawnkindRaceDiversification.Patches
                 if (prevPawnkindHairtags != null)
                     request.KindDef.hairTags = prevPawnkindHairtags;
                 justGeneratedRace = false;
+                IsPawnOfPlayerFaction = false;
+                //PawnkindRaceDiversification.Logger.Message("Race selected successfully.");
             }
             //Unpause the weight generator.
             weightGeneratorPaused = false;
@@ -170,7 +176,7 @@ namespace PawnkindRaceDiversification.Patches
             //HAR does not handle hair generation for pawnkinds, therefore I will fix this myself.
             //  To revert to default behavior that HAR already does with factions, I can temporarily set
             //  the pawnkind hairtags to null in order to stop forced hair generation.
-            //Pawns that are allowed to have forced hair are pawns that already do spawn with hair.
+            //Pawns that are allowed to have forced hair are pawns that already do spawn with hair (will change this later).
             //  However, pawns that are not supposed to spawn with hair should not have forced pawnkind hair gen.
             if (pawnkindDef.hairTags != null)
             {

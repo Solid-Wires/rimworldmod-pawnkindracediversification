@@ -82,6 +82,7 @@
     <Compile Include="Extensions\FactionWeight.cs" />
     <Compile Include="Extensions\RaceRandomizationExcluded.cs" />
     <Compile Include="Extensions\PawnkindWeight.cs" />
+    <Compile Include="Patches\ChjeeDroidFixes.cs" />
     <Compile Include="Patches\PrepareCarefullyTweaks.cs" />
     <Compile Include="UI\WeightAdjustmentWindow.cs" />
     <Compile Include="UI\WeightSettingsWindow.cs" />
