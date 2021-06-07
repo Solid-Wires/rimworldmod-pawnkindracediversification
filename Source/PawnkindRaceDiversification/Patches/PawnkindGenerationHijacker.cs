@@ -4,6 +4,7 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using Verse;
+using static PawnkindRaceDiversification.Data.GeneralLoadingDatabase;
 using static PawnkindRaceDiversification.Extensions.ExtensionDatabase;
 
 namespace PawnkindRaceDiversification.Patches
@@ -12,6 +13,8 @@ namespace PawnkindRaceDiversification.Patches
     {
         //This can be set to true to prevent pawns from being generated with race weights.
         private static bool weightGeneratorPaused = false;
+        private static bool justGeneratedRace = false;
+        private static List<string> prevPawnkindHairtags = null;
         public static void PauseWeightGeneration()
         {
             weightGeneratorPaused = true;
@@ -47,24 +50,27 @@ namespace PawnkindRaceDiversification.Patches
             {
                 //Change this kindDef's race to the selected race temporarily.
                 request.KindDef.race = WeightedRaceSelectionProcedure(kindDef, faction);
-                //PawnkindRaceDiversification.Logger.Message("Race selected: " + request.KindDef.race.label);
+                HairFixProcedure(kindDef);
+                justGeneratedRace = true;
             }
         }
         public static void AfterDeterminedRace(PawnGenerationRequest request)
         {
             //Make sure that we don't completely override the race value in the pawnkind def.
-            //  Set it back to what it originally was after making the pawn.
-            //  Does not do anything if the weight generator was paused before.
-            if (!weightGeneratorPaused)
+            //  Set it back to what it originally was after making the pawn (should always be successful since
+            //      this is the same pawn being generated).
+            if (justGeneratedRace)
             {
-                PawnKindDef kindDef = request.KindDef;
-                if (kindDef != null
-                  && kindDef.RaceProps.Humanlike)
-                    //Reset this kindDef's race after generating the pawn.
-                    request.KindDef.race = racesLoaded.TryGetValue(pawnKindRaceDefRelations.TryGetValue(request.KindDef));
+                //Reset this kindDef's race and hairtags after generating the pawn.
+                request.KindDef.race = racesLoaded.TryGetValue(pawnKindRaceDefRelations.TryGetValue(request.KindDef));
+                if (prevPawnkindHairtags != null)
+                    request.KindDef.hairTags = prevPawnkindHairtags;
+                justGeneratedRace = false;
             }
             //Unpause the weight generator.
             weightGeneratorPaused = false;
+            //Reset remembered pawnkind hair tags.
+            prevPawnkindHairtags = null;
         }
 
         public static ThingDef WeightedRaceSelectionProcedure(PawnKindDef pawnKind, Faction faction)
@@ -155,9 +161,25 @@ namespace PawnkindRaceDiversification.Patches
                 PawnkindRaceDiversification.Logger.Warning("Failed to assign weighted race! Defaulting to the original race from the pawnkind instead.");
             }
             
-
             //Return the original pawnkind race if no race selected
             return pawnKind.race;
+        }
+
+        private static void HairFixProcedure(PawnKindDef pawnkindDef)
+        {
+            //HAR does not handle hair generation for pawnkinds, therefore I will fix this myself.
+            //  To revert to default behavior that HAR already does with factions, I can temporarily set
+            //  the pawnkind hairtags to null in order to stop forced hair generation.
+            if (pawnkindDef.hairTags != null)
+            {
+                List<string> loadedHairTags = raceHairTagData[pawnkindDef.race.defName];
+                if (loadedHairTags == null
+                    || loadedHairTags[0] == "nohair")
+                {
+                    prevPawnkindHairtags = pawnkindDef.hairTags;
+                    pawnkindDef.hairTags = null;
+                }
+            }
         }
     }
 }

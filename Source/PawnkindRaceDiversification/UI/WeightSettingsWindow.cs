@@ -4,7 +4,7 @@ using Verse;
 using PawnkindRaceDiversification.Handlers;
 using HugsLib.Settings;
 using PawnkindRaceDiversification.Extensions;
-using System.Linq;
+using static PawnkindRaceDiversification.Extensions.ExtensionDatabase;
 
 namespace PawnkindRaceDiversification.UI
 {
@@ -253,7 +253,7 @@ namespace PawnkindRaceDiversification.UI
                                 if ((prevAdjustedRaces[race] && windowContext == HandleContext.GLOBALS)
                                     || (handle.Value < 0.0f && windowContext != HandleContext.GLOBALS))
                                 {
-                                    KeyValuePair<string, RaceDiversificationPool> data = ExtensionDatabase.racesDiversified.FirstOrFallback(r => r.Key == race);
+                                    KeyValuePair<string, RaceDiversificationPool> data = racesDiversified.FirstOrFallback(r => r.Key == race);
                                     if (data.Key != null)
                                         return data.Value.flatGenerationWeight;
                                 }

@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using PawnkindRaceDiversification.Extensions;
 using UnityEngine.SceneManagement;
 using PawnkindRaceDiversification.UI;
+using static PawnkindRaceDiversification.Data.GeneralLoadingDatabase;
+using static PawnkindRaceDiversification.Extensions.ExtensionDatabase;
 
 namespace PawnkindRaceDiversification
 {
@@ -130,14 +132,18 @@ namespace PawnkindRaceDiversification
                         if (fileName == "ImpliedDefs"
                          || fileName == "Cobra_Hybrid")
                         {
-                            ExtensionDatabase.impliedRacesLoaded.Add(def.defName);
+                            impliedRacesLoaded.Add(def.defName);
                             continue;
                         }
                     }
 
-                    //Add this race to the database
+                    //Add this race to the databases
                     raceNames.Add(def.defName);
-                    ExtensionDatabase.racesLoaded.Add(def.defName, def);
+                    racesLoaded.Add(def.defName, def);
+                    if (def.alienRace.hairSettings.hasHair)
+                        raceHairTagData.Add(def.defName, def.alienRace.hairSettings.hairTags);
+                    else
+                        raceHairTagData.Add(def.defName, new List<string>() { "nohair" });
 
                     //Get all values from extensions
                     RaceDiversificationPool ext = def.GetModExtension<RaceDiversificationPool>();
@@ -145,7 +151,7 @@ namespace PawnkindRaceDiversification
                     {
                         //You can exclude a race from being modified in the settings by making the flat generation weight negative (-1)
                         if (ext.flatGenerationWeight < 0.0f) raceNames.Remove(def.defName);
-                        else ExtensionDatabase.racesDiversified.Add(def.defName, ext);
+                        else racesDiversified.Add(def.defName, ext);
 
                         //Logger.Message("Def loaded: " + def.defName + ", extension values logged after");
                         //LogValues(ext.factionWeights[0].faction.defName, ext.pawnKindWeights[0].pawnkind.defName, ext.flatGenerationWeight);
@@ -189,10 +195,10 @@ namespace PawnkindRaceDiversification
                 //Look through all existing pawnkind defs
                 foreach (PawnKindDef def in kindDefs)
                 {
-                    ExtensionDatabase.pawnKindRaceDefRelations.Add(def, def.race.defName);
+                    pawnKindRaceDefRelations.Add(def, def.race.defName);
                     if (def.GetModExtension<RaceRandomizationExcluded>() != null)
                     {
-                        ExtensionDatabase.pawnKindDefsExcluded.Add(def);
+                        pawnKindDefsExcluded.Add(def);
                     }
                 }
 

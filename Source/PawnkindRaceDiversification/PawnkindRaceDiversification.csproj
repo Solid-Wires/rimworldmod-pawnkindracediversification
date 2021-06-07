@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\ExtensionDatabase.cs" />
+    <Compile Include="Data\GeneralLoadingDatabase.cs" />
     <Compile Include="Extensions\FactionWeight.cs" />
     <Compile Include="Extensions\RaceRandomizationExcluded.cs" />
     <Compile Include="Extensions\PawnkindWeight.cs" />
