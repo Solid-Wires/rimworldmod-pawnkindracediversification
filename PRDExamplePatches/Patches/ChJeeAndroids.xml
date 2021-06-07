@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+	<Operation Class="PatchOperationFindMod">
+		<mods>
+			<li>Androids</li>
+		</mods>
+		<match Class="PatchOperationSequence">
+			<operations>
+				<li Class="PatchOperationConditional">
+					<xpath>*/AlienRace.ThingDef_AlienRace
+					[
+						defName="ChjDroid" or 
+						defName="ChjBattleDroid"
+					]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/AlienRace.ThingDef_AlienRace
+						[
+							defName="ChjDroid" or 
+							defName="ChjBattleDroid"
+						]/modExtensions
+						</xpath>
+						<value>
+							<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+								<backstoryFilters>
+									<li>
+										<categories>
+										  <li>ChjDroid</li>
+										</categories>
+										<commonality>0.95</commonality>
+									</li>
+								</backstoryFilters>
+								<overrideBackstories>true</overrideBackstories>
+								<flatGenerationWeight>0.0</flatGenerationWeight>
+							</li>
+						</value>
+					</nomatch>
+				</li>
+				<li Class="PatchOperationConditional">
+					<xpath>*/AlienRace.ThingDef_AlienRace
+					[
+						defName="ChjAndroid"
+					]/modExtensions/li[@Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool"]</xpath>
+					<nomatch Class="PatchOperationAdd">
+						<xpath>*/AlienRace.ThingDef_AlienRace
+						[
+							defName="ChjAndroid"
+						]/modExtensions
+						</xpath>
+						<value>
+							<li Class="PawnkindRaceDiversification.Extensions.RaceDiversificationPool">
+								<backstoryFilters>
+									<li>
+										<categories>
+										  <li>ChjAndroid</li>
+										</categories>
+										<commonality>0.95</commonality>
+									</li>
+								</backstoryFilters>
+								<overrideBackstories>true</overrideBackstories>
+								<flatGenerationWeight>0.04</flatGenerationWeight>
+							</li>
+						</value>
+					</nomatch>
+				</li>
+			</operations>
+		</match>
+	</Operation>
+</Patch>
