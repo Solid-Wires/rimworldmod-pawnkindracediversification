@@ -220,12 +220,6 @@ namespace PawnkindRaceDiversification.Patches
             string race = pawnkindDef.race.defName;
             if (racesDiversified.ContainsKey(race))
             {
-                //Back up the previous backstory information, so that we are not overriding it afterwards
-                if (factionDef != null)
-                    prevFactionBackstoryCategoryFilters = factionDef.backstoryFilters.ListFullCopyOrNull();
-                prevPawnkindBackstoryCategories = pawnkindDef.backstoryCategories.ListFullCopyOrNull();
-                prevPawnkindBackstoryCategoryFilters = pawnkindDef.backstoryFilters.ListFullCopyOrNull();
-
                 //Extension data
                 RaceDiversificationPool raceExtensionData = racesDiversified[race];
                 FactionWeight factionWeightData = null;
@@ -308,13 +302,25 @@ namespace PawnkindRaceDiversification.Patches
                         addedOriginalFactionStuff = true;
                     }
                 }
+                if (backstoryFactionFilters.Count == 0
+                    && backstoryPawnkindFilters.Count == 0)
+                {
+                    //Nothing happened here, get out!
+                    return;
+                }
+
+                //Back up the previous backstory information, so that we are not overriding it afterwards
+                if (factionDef != null)
+                    prevFactionBackstoryCategoryFilters = factionDef.backstoryFilters.ListFullCopyOrNull();
+                prevPawnkindBackstoryCategories = pawnkindDef.backstoryCategories.ListFullCopyOrNull();
+                prevPawnkindBackstoryCategoryFilters = pawnkindDef.backstoryFilters.ListFullCopyOrNull();
+                generatedBackstoryInfo = true;
 
                 //Assignment
                 if (factionDef != null)
                     factionDef.backstoryFilters = backstoryFactionFilters;
                 pawnkindDef.backstoryCategories = backstoryCategories;
                 pawnkindDef.backstoryFilters = backstoryPawnkindFilters;
-                generatedBackstoryInfo = true;
             }
         }
     }
