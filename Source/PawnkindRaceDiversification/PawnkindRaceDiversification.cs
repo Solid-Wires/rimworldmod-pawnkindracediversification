@@ -142,8 +142,9 @@ namespace PawnkindRaceDiversification
                     //Add this race to the databases
                     raceNames.Add(def.defName);
                     racesLoaded.Add(def.defName, def);
-                    if (def.alienRace.hairSettings.hasHair)
-                        raceHairTagData.Add(def.defName, def.alienRace.hairSettings.hairTags);
+                    if (def.alienRace.hairSettings == null
+                        || def.alienRace.hairSettings.hasHair)
+                        raceHairTagData.Add(def.defName, def.alienRace.hairSettings?.hairTags);
                     else
                         raceHairTagData.Add(def.defName, new List<string>() { "nohair" });
 
@@ -199,9 +200,7 @@ namespace PawnkindRaceDiversification
                 {
                     pawnKindRaceDefRelations.Add(def, def.race.defName);
                     if (def.GetModExtension<RaceRandomizationExcluded>() != null)
-                    {
                         pawnKindDefsExcluded.Add(def);
-                    }
                 }
 
                 SettingsHandler = new ModSettingsHandler();
