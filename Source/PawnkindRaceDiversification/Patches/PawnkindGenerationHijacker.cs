@@ -302,8 +302,9 @@ namespace PawnkindRaceDiversification.Patches
                         addedOriginalFactionStuff = true;
                     }
                 }
-                if (backstoryFactionFilters.Count == 0
-                    && backstoryPawnkindFilters.Count == 0)
+                if ((backstoryFactionFilters.Count == 0
+                    || backstoryPawnkindFilters.Count == 0)
+                    && backstoryCategories.Count == 0)
                 {
                     //Nothing happened here, get out!
                     return;
