@@ -37,6 +37,9 @@ namespace PawnkindRaceDiversification.Patches
             //Chjee's Androids
             ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.ANDROIDS, "DroidUtility", "MakeDroidTemplate", null,
                 null, null, typeof(ChjeeDroidFixes).GetMethod("PawnHostilitySettingFix"));
+            //Character Editor
+            ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.CHARACTER_EDITOR, "PresetPawnNew", "GeneratePawn", null,
+                typeof(AnyModGeneratedPawn).GetMethod("OnModGeneratedPawn"));
         }
 
         private static void ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod modToPatch, string className, string targetMethod, Type[] parameters = null,
