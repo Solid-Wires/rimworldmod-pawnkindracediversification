@@ -28,10 +28,14 @@
 	<PawnkindRaceDiversity_WeightSettingColumnLabel_Action>Action</PawnkindRaceDiversity_WeightSettingColumnLabel_Action>
 	<PawnkindRaceDiversity_WeightSettingColumnTooltip_Action>Choose what you want to do with this race's spawn conditions.</PawnkindRaceDiversity_WeightSettingColumnTooltip_Action>
 	
+	<PawnkindRaceDiversity_DebugMode_label>Debug mode</PawnkindRaceDiversity_DebugMode_label>
+	<PawnkindRaceDiversity_DebugMode_description>Prints out more information to the debug console. You should leave this off unless you are troubleshooting this mod.</PawnkindRaceDiversity_DebugMode_description>
 	<PawnkindRaceDiversity_OverrideAllHumanPawnkinds_label>Override all human pawnkinds</PawnkindRaceDiversity_OverrideAllHumanPawnkinds_label>
 	<PawnkindRaceDiversity_OverrideAllHumanPawnkinds_description>Allows the random race weight selection procedure to override the races of pawnkinds that were originally hardcoded as humans. Defaults to true.</PawnkindRaceDiversity_OverrideAllHumanPawnkinds_description>
 	<PawnkindRaceDiversity_OverrideAllAlienPawnkinds_label>Override all alien pawnkinds</PawnkindRaceDiversity_OverrideAllAlienPawnkinds_label>
 	<PawnkindRaceDiversity_OverrideAllAlienPawnkinds_description>Allows the random race weight selection procedure to override the races of pawnkinds that were originally hardcoded as certain alien races. Defaults to false.</PawnkindRaceDiversity_OverrideAllAlienPawnkinds_description>
+	<PawnkindRaceDiversity_OverridePawnsWithInconsistentAges_label>Override pawns with inconsistent ages</PawnkindRaceDiversity_OverridePawnsWithInconsistentAges_label>
+	<PawnkindRaceDiversity_OverridePawnsWithInconsistentAges_description>Allows overriding pawns that have ages that are inconsistent with what age they are supposed to be from their pawnkind (ex: children, skeletons, etc with human ages). Defaults to false.</PawnkindRaceDiversity_OverridePawnsWithInconsistentAges_description>
 	
 	<PawnkindRaceDiversity_FlatWeights_Category_description>These weights influence the chance of any pawn becoming a certain race.</PawnkindRaceDiversity_FlatWeights_Category_description>
 	<PawnkindRaceDiversity_FlatWeightsPerWorldGen_Category_description>Sets local save data of flat weights for new worlds you generate. If you want to start a world with specific aliens, modify this setting. This setting resets all values on every load to match global weights (no effects). This setting is only visible without a save loaded.</PawnkindRaceDiversity_FlatWeightsPerWorldGen_Category_description>
