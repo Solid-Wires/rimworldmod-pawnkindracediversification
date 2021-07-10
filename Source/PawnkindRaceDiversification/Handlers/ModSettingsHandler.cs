@@ -12,8 +12,10 @@ namespace PawnkindRaceDiversification.Handlers
 {
     internal class ModSettingsHandler
     {
+        internal static SettingHandle<bool> DebugMode = null;
         internal static SettingHandle<bool> OverrideAllHumanPawnkinds = null;
         internal static SettingHandle<bool> OverrideAllAlienPawnkinds = null;
+        internal static SettingHandle<bool> OverridePawnsWithInconsistentAges = null;
         internal static Dictionary<string, float> setFlatWeights = new Dictionary<string, float>();
         internal static Dictionary<string, float> setLocalFlatWeights = new Dictionary<string, float>();
         internal static List<SettingHandle<float>> allHandleReferences = new List<SettingHandle<float>>();
@@ -23,8 +25,10 @@ namespace PawnkindRaceDiversification.Handlers
         internal void PrepareSettingHandles(ModSettingsPack pack, List<string> races)
         {
             evaluatedRaces = races;
+            DebugMode = pack.GetHandle("DebugMode", Translator.Translate("PawnkindRaceDiversity_DebugMode_label"), Translator.Translate("PawnkindRaceDiversity_DebugMode_description"), false);
             OverrideAllHumanPawnkinds = pack.GetHandle("OverrideAllHumanPawnkinds", Translator.Translate("PawnkindRaceDiversity_OverrideAllHumanPawnkinds_label"), Translator.Translate("PawnkindRaceDiversity_OverrideAllHumanPawnkinds_description"), true);
             OverrideAllAlienPawnkinds = pack.GetHandle("OverrideAllAlienPawnkinds", Translator.Translate("PawnkindRaceDiversity_OverrideAllAlienPawnkinds_label"), Translator.Translate("PawnkindRaceDiversity_OverrideAllAlienPawnkinds_description"), false);
+            OverridePawnsWithInconsistentAges = pack.GetHandle("OverridePawnsWithInconsistentAges", Translator.Translate("PawnkindRaceDiversity_OverridePawnsWithInconsistentAges_label"), Translator.Translate("PawnkindRaceDiversity_OverridePawnsWithInconsistentAges_description"), false);
 
             //Global weights
             ConstructRaceAdjustmentHandles(pack, HandleContext.GLOBALS);

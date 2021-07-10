@@ -3,6 +3,7 @@ using PawnkindRaceDiversification.Handlers;
 using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Verse;
 using static PawnkindRaceDiversification.Data.GeneralLoadingDatabase;
 using static PawnkindRaceDiversification.Extensions.ExtensionDatabase;
@@ -29,39 +30,57 @@ namespace PawnkindRaceDiversification.Patches
         //Harmony manual prefix method
         public static void DetermineRace(PawnGenerationRequest request)
         {
-            //These steps make sure whether it is really necessary to modify this pawn
-            //   or not.
-            /*Precautions taken:
-             *  1.) kindDef isn't null
-             *  2.) kindDef is a humanlike
-             *  3.) kindDef isn't an excluded kind def
-             *  4.) raceDef isn't an implied race (pawnmorpher compatibility)
-             *  5.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
-             *  6.) The weight generator isn't paused
-             *  7.) Prepare Carefully isn't doing anything
-             *  8.) kindDef is human and settings want to override all human pawnkinds
-             *      OR  kindDef isn't human and settings want to override all alien pawnkinds.
-             * */
-            PawnKindDef kindDef = request.KindDef;
-            Faction faction = request.Faction;
-            if (kindDef != null
-              && kindDef.RaceProps.Humanlike
-              && !(pawnKindDefsExcluded.Contains(kindDef))
-              && !(impliedRacesLoaded.Contains(kindDef.race.defName))
-              && !(faction != null && (faction.def.defName == "PawnmorpherPlayerColony" || faction.def.defName == "PawnmorpherEnclave"))
-              && !(weightGeneratorPaused)
-              && !(PrepareCarefullyTweaks.loadedAlienRace != "none")
-              && ((kindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
-              || (kindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds)))
+            try
             {
-                //Change this kindDef's race to the selected race temporarily.
-                request.KindDef.race = WeightedRaceSelectionProcedure(kindDef, faction);
-                HairFixProcedure(kindDef);
-                BackstoryInjectionProcedure(kindDef, faction?.def);
+                //These steps make sure whether it is really necessary to modify this pawn
+                //   or not.
+                /*Precautions taken:
+                 *  1.) kindDef isn't null
+                 *  2.) kindDef is a humanlike
+                 *  3.) kindDef isn't an excluded kind def
+                 *  4.) raceDef isn't an implied race (pawnmorpher compatibility)
+                 *  5.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
+                 *  6.) The weight generator isn't paused
+                 *  7.) Prepare Carefully isn't doing anything
+                 *  8.) kindDef is human and settings want to override all human pawnkinds
+                 *  9.) The age of this request is consistent with the age of the race
+                 *      OR  kindDef isn't human and settings want to override all alien pawnkinds.
+                 * */
+                PawnKindDef kindDef = request.KindDef;
+                Faction faction = request.Faction;
+                if (kindDef != null
+                  && kindDef.RaceProps.Humanlike
+                  && !(pawnKindDefsExcluded.Contains(kindDef))
+                  && !(impliedRacesLoaded.Contains(kindDef.race.defName))
+                  && !(faction != null && (faction.def.defName == "PawnmorpherPlayerColony" || faction.def.defName == "PawnmorpherEnclave"))
+                  && !(weightGeneratorPaused)
+                  && !(PrepareCarefullyTweaks.loadedAlienRace != "none")
+                  && ((kindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
+                  && (IsValidAge(kindDef, request))
+                  || (kindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds)))
+                {
+                    //Change this kindDef's race to the selected race temporarily.
+                    request.KindDef.race = WeightedRaceSelectionProcedure(kindDef, faction);
+                    HairFixProcedure(kindDef);
+                    BackstoryInjectionProcedure(kindDef, faction?.def);
 
-                justGeneratedRace = true;
-                IsPawnOfPlayerFaction = faction != null ? faction.IsPlayer : false;
-                //PawnkindRaceDiversification.Logger.Message("Selecting race...");
+                    justGeneratedRace = true;
+                    IsPawnOfPlayerFaction = faction != null ? faction.IsPlayer : false;
+                    //PawnkindRaceDiversification.Logger.Message("Selecting race...");
+                }
+            } catch (Exception e)
+            {
+                if (PawnkindRaceDiversification.IsDebugModeInSettingsActive())
+                {
+                    string err = "PRD encountered an error while generating a pawn! Stacktrace: \n";
+                    err += "Error probably occured at line " + new StackTrace(e, true).GetFrame(0).GetFileLineNumber().ToString() + "\n";
+                    err += e.ToString();
+                    PawnkindRaceDiversification.Logger.Error(err);
+                }
+                else
+                {
+                    PawnkindRaceDiversification.Logger.Error(e.StackTrace.ToString());
+                }
             }
         }
         public static void AfterDeterminedRace(PawnGenerationRequest request)
@@ -282,6 +301,34 @@ namespace PawnkindRaceDiversification.Patches
                 pawnkindDef.backstoryCategories = backstoryCategories;
                 pawnkindDef.backstoryFilters = backstoryPawnkindFilters;
             }
+        }
+
+        //Returns false if any conditions are met that would invalidate the age.
+        private static bool IsValidAge(PawnKindDef kindDef, PawnGenerationRequest request)
+        {
+            /*
+            if (ModSettingsHandler.DebugMode)
+                PawnkindRaceDiversification.Logger.Message("Generated biological age: " + biologicalAge.ToString() + "\n"
+                    + "Minimum allowed age: " + kindDef.race.race.ageGenerationCurve.Points[0].x.ToString() + "\n"
+                    + "Maximum allowed age: " + kindDef.race.race.ageGenerationCurve.Points[kindDef.race.race.ageGenerationCurve.Points.Capacity - 1].x.ToString());
+            */
+            //Only invalidates if settings don't allow age overriding
+            if (!ModSettingsHandler.OverridePawnsWithInconsistentAges)
+            {
+                //Invalid if younger than or older than what's supposed to be generated (doesn't appear to be used)
+                /*
+                if (kindDef.race.race.ageGenerationCurve.Points[0].x > biologicalAge
+                    || kindDef.race.race.ageGenerationCurve.Points[kindDef.race.race.ageGenerationCurve.Points.Capacity - 1].x < biologicalAge)
+                {
+                    return false;
+                }
+                */
+                //Invalid if generated as a newborn or the kindDef's min and max generated age is 0
+                //  Assumed to be a child
+                if (request.Newborn || (kindDef.minGenerationAge == 0 && kindDef.maxGenerationAge == 0))
+                    return false;
+            }
+            return true;
         }
     }
 }

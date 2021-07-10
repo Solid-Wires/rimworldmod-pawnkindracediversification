@@ -41,7 +41,10 @@ namespace PawnkindRaceDiversification
         };
         internal static Dictionary<SeekedMod, Assembly> referencedModAssemblies = new Dictionary<SeekedMod, Assembly>();
 
-        public const bool DEBUG_MODE = false;
+        public static bool IsDebugModeInSettingsActive()
+        {
+            return ModSettingsHandler.DebugMode.Value;
+        }
 
         public override string ModIdentifier => "PawnkindRaceDiversification";
 
