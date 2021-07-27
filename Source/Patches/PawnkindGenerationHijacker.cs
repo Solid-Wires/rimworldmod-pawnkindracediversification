@@ -72,7 +72,7 @@ namespace PawnkindRaceDiversification.Patches
                 {
                     //Change this kindDef's race to the selected race temporarily.
                     request.KindDef.race = WeightedRaceSelectionProcedure(request.KindDef, request.Faction);
-                    HairFixProcedure(request.KindDef);
+                    StyleFixProcedure(request.KindDef);
                     BackstoryInjectionProcedure(request.KindDef, request.Faction?.def);
 
                     IsPawnOfPlayerFaction = request.Faction != null ? request.Faction.IsPlayer : false;
@@ -238,33 +238,48 @@ namespace PawnkindRaceDiversification.Patches
             //Return the original pawnkind race if no race selected
             return pawnKind.race;
         }
-        private static void HairFixProcedure(PawnKindDef pawnkindDef)
+        private static void StyleFixProcedure(PawnKindDef pawnkindDef)
         {
             //HAR does not handle hair generation for pawnkinds, therefore I will fix this myself.
             //  To revert to default behavior that HAR already does with factions, I can temporarily set
             //  the pawnkind hairtags to null in order to stop forced hair generation.
             //Pawns that are allowed to have forced hair are pawns that already do spawn with hair (will change this later).
             //  However, pawns that are not supposed to spawn with hair should not have forced pawnkind hair gen.
-            
-            
-            if (pawnkindDef.styleItemTags != null)
+            if (pawnkindDef?.styleItemTags != null)
             {
                 Dictionary<Type, StyleSettings> loadedStyleSettings = raceStyleData.TryGetValue(pawnkindDef.race.defName);
                 if (loadedStyleSettings != null)
                 {
-                    List<StyleItemTagWeighted> newStyleItemTags = new List<StyleItemTagWeighted>();
+                    List<StyleItemTagWeighted> insertedStyleItemTags = new List<StyleItemTagWeighted>();
+                    List<StyleItemTagWeighted> overriddenStyleItemTags = new List<StyleItemTagWeighted>();
+                    bool foundOverrides = false;
                     prevPawnkindItemSettings = pawnkindDef.styleItemTags;
+                    //Start finding tag overrides first
                     foreach (KeyValuePair<Type, StyleSettings> ts in loadedStyleSettings)
                     {
                         if (ts.Value != null
                             && ts.Value.hasStyle
-                            && ts.Value.styleTags?.Count > 0)
+                            && (ts.Key == typeof(TattooDef) && ModLister.IdeologyInstalled)
+                            && ((ts.Value.styleTags?.Count > 0) || (ts.Value.styleTagsOverride?.Count > 0)))
                         {
-                            foreach (string s in ts.Value.styleTags)
-                                newStyleItemTags.Add(new StyleItemTagWeighted(s, 1.0f));
-                            pawnkindDef.styleItemTags = newStyleItemTags;
+                            if (ts.Value.styleTags != null)
+                                foreach (string s in ts.Value.styleTags)
+                                {
+                                    insertedStyleItemTags.Add(new StyleItemTagWeighted(s, 1.0f));
+                                    overriddenStyleItemTags.Add(new StyleItemTagWeighted(s, 1.0f));
+                                }
+                            if (ts.Value.styleTagsOverride != null)
+                                foreach (string s in ts.Value.styleTagsOverride)
+                                {
+                                    overriddenStyleItemTags.Add(new StyleItemTagWeighted(s, 1.0f));
+                                    foundOverrides = true;
+                                }
                         }
                     }
+                    if (foundOverrides)
+                        pawnkindDef.styleItemTags = overriddenStyleItemTags;
+                    else if (insertedStyleItemTags.Count > 0)
+                        pawnkindDef.styleItemTags?.AddRange(insertedStyleItemTags);
                 }
             }
         }
