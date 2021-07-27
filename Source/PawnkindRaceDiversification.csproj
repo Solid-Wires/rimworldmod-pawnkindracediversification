@@ -82,7 +82,9 @@
     <Compile Include="Extensions\RaceRandomizationExcluded.cs" />
     <Compile Include="Extensions\PawnkindWeight.cs" />
     <Compile Include="Patches\ChjeeDroidFixes.cs" />
+    <Compile Include="Patches\WorldRelatedPatches.cs" />
     <Compile Include="Patches\PrepareCarefullyTweaks.cs" />
+    <Compile Include="PawnkindRaceDiversification.cs" />
     <Compile Include="UI\WeightAdjustmentWindow.cs" />
     <Compile Include="UI\WeightSettingsWindow.cs" />
     <Compile Include="Handlers\HandleContext.cs" />
@@ -90,7 +92,6 @@
     <Compile Include="Patches\AnyModGeneratedPawn.cs" />
     <Compile Include="Patches\HarmonyPatches.cs" />
     <Compile Include="Patches\PawnkindGenerationHijacker.cs" />
-    <Compile Include="PawnkindRaceDiversification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Handlers\ModSettingsHandler.cs" />
     <Compile Include="Extensions\RaceDiversificationPool.cs" />

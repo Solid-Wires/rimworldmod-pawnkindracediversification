@@ -1,9 +1,11 @@
-﻿using PawnkindRaceDiversification.Extensions;
+﻿using AlienRace;
+using PawnkindRaceDiversification.Extensions;
 using PawnkindRaceDiversification.Handlers;
 using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Verse;
 using static PawnkindRaceDiversification.Data.GeneralLoadingDatabase;
 using static PawnkindRaceDiversification.Extensions.ExtensionDatabase;
@@ -14,9 +16,8 @@ namespace PawnkindRaceDiversification.Patches
     {
         //This can be set to true to prevent pawns from being generated with race weights.
         private static bool weightGeneratorPaused = false;
-        private static bool justGeneratedRace = false;
         private static bool generatedBackstoryInfo = false;
-        private static List<string> prevPawnkindHairtags = null;
+        private static List<StyleItemTagWeighted> prevPawnkindItemSettings = null;
         private static List<BackstoryCategoryFilter> prevFactionBackstoryCategoryFilters = null;
         private static List<string> prevPawnkindBackstoryCategories = null;
         private static List<BackstoryCategoryFilter> prevPawnkindBackstoryCategoryFilters = null;
@@ -24,48 +25,57 @@ namespace PawnkindRaceDiversification.Patches
         {
             weightGeneratorPaused = true;
         }
-        public static bool DidRaceGenerate() => justGeneratedRace;
+        //public static bool DidRaceGenerate() => justGeneratedRace;
         public static bool IsPawnOfPlayerFaction { get; private set; } = false;
+
+        public static bool IsKindValid(PawnGenerationRequest request, bool contextBefore)
+        {
+            //These steps make sure whether it is really necessary to modify this pawn
+            //   or not.
+            /*Precautions taken:
+                *  1.) kindDef isn't null
+                *  2.) kindDef is a humanlike
+                *  3.) kindDef isn't an excluded kind def
+                *  4.) raceDef isn't an implied race (pawnmorpher compatibility)
+                *  5.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
+                *  6.) The weight generator isn't paused
+                *  7.) Prepare Carefully isn't doing anything
+                *  8.) kindDef is human and settings want to override all human pawnkinds
+                *  9.) The age of this request is consistent with the age of the race
+                *      OR  kindDef isn't human and settings want to override all alien pawnkinds.
+            * */
+            if (request.KindDef != null
+                && (request.KindDef.RaceProps != null
+                    && request.KindDef.RaceProps.Humanlike)
+                && !(pawnKindDefsExcluded.Contains(request.KindDef.defName))
+                && !(impliedRacesLoaded.Contains(request.KindDef.race.defName))
+                && !(request.Faction != null && (request.Faction.def.defName == "PawnmorpherPlayerColony" || request.Faction.def.defName == "PawnmorpherEnclave"))
+                && !(weightGeneratorPaused)
+                && !(PrepareCarefullyTweaks.loadedAlienRace != "none")
+                && (IsValidAge(request.KindDef, request))
+                && 
+                (!contextBefore //Context after-determining is different at this point here
+                || (
+                ((request.KindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
+                || (request.KindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds))
+                )))
+                return true;
+            return false;
+        }
 
         //Harmony manual prefix method
         public static void DetermineRace(PawnGenerationRequest request)
         {
             try
             {
-                //These steps make sure whether it is really necessary to modify this pawn
-                //   or not.
-                /*Precautions taken:
-                 *  1.) kindDef isn't null
-                 *  2.) kindDef is a humanlike
-                 *  3.) kindDef isn't an excluded kind def
-                 *  4.) raceDef isn't an implied race (pawnmorpher compatibility)
-                 *  5.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
-                 *  6.) The weight generator isn't paused
-                 *  7.) Prepare Carefully isn't doing anything
-                 *  8.) kindDef is human and settings want to override all human pawnkinds
-                 *  9.) The age of this request is consistent with the age of the race
-                 *      OR  kindDef isn't human and settings want to override all alien pawnkinds.
-                 * */
-                PawnKindDef kindDef = request.KindDef;
-                Faction faction = request.Faction;
-                if (kindDef != null
-                  && kindDef.RaceProps.Humanlike
-                  && !(pawnKindDefsExcluded.Contains(kindDef))
-                  && !(impliedRacesLoaded.Contains(kindDef.race.defName))
-                  && !(faction != null && (faction.def.defName == "PawnmorpherPlayerColony" || faction.def.defName == "PawnmorpherEnclave"))
-                  && !(weightGeneratorPaused)
-                  && !(PrepareCarefullyTweaks.loadedAlienRace != "none")
-                  && ((kindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
-                  && (IsValidAge(kindDef, request))
-                  || (kindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds)))
+                if (IsKindValid(request, true))
                 {
                     //Change this kindDef's race to the selected race temporarily.
-                    request.KindDef.race = WeightedRaceSelectionProcedure(kindDef, faction);
-                    //HairFixProcedure(kindDef);
-                    BackstoryInjectionProcedure(kindDef, faction?.def);
+                    request.KindDef.race = WeightedRaceSelectionProcedure(request.KindDef, request.Faction);
+                    HairFixProcedure(request.KindDef);
+                    BackstoryInjectionProcedure(request.KindDef, request.Faction?.def);
 
-                    justGeneratedRace = true;
-                    IsPawnOfPlayerFaction = faction != null ? faction.IsPlayer : false;
+                    IsPawnOfPlayerFaction = request.Faction != null ? request.Faction.IsPlayer : false;
                     //PawnkindRaceDiversification.Logger.Message("Selecting race...");
                 }
             } catch (Exception e)
@@ -73,7 +83,6 @@ namespace PawnkindRaceDiversification.Patches
                 if (PawnkindRaceDiversification.IsDebugModeInSettingsActive())
                 {
                     string err = "PRD encountered an error BEFORE generating a pawn! Stacktrace: \n";
-                    err += "Error probably occured at line " + new StackTrace(e, true).GetFrame(0).GetFileLineNumber().ToString() + "\n";
                     err += e.ToString();
                     PawnkindRaceDiversification.Logger.Error(err);
                 }
@@ -87,43 +96,49 @@ namespace PawnkindRaceDiversification.Patches
         {
             try
             {
-                //Make sure that we don't completely override the race value in the pawnkind def.
-                //  Set it back to what it originally was after making the pawn (should always be successful since
-                //      this is the same pawn being generated).
-                if (justGeneratedRace)
+                if (IsKindValid(request, false))
                 {
-                    //Reset this kindDef's race and hairtags after generating the pawn.
-                    request.KindDef.race = racesLoaded.TryGetValue(pawnKindRaceDefRelations.TryGetValue(request.KindDef));
+                    //It's okay if this runs twice, because we want to be EXTRA sure that the pawnkind is fully reset
+                    //  after a race was selected.
 
-                    //Reset backstory-related lists
-                    if (generatedBackstoryInfo)
+                    //Shouldn't have to null check this, but it could be possible...
+                    if (request.KindDef != null)
                     {
-                        if (request.Faction != null)
-                            request.Faction.def.backstoryFilters = prevFactionBackstoryCategoryFilters.ListFullCopyOrNull();
-                        request.KindDef.backstoryCategories = prevPawnkindBackstoryCategories.ListFullCopyOrNull();
-                        request.KindDef.backstoryFilters = prevPawnkindBackstoryCategoryFilters.ListFullCopyOrNull();
-                        generatedBackstoryInfo = false;
+                        //Reset this kindDef's style settings
+                        if (prevPawnkindItemSettings != null)
+                            request.KindDef.styleItemTags = prevPawnkindItemSettings.ListFullCopyOrNull();
+                        //Reset this kindDef's race
+                        string raceDefName = pawnKindRaceDefRelations.TryGetValue(request.KindDef.defName);
+                        request.KindDef.race = raceDefName != null ? racesLoaded.TryGetValue(raceDefName) : racesLoaded.First(r => r.Key.ToLower() == "human").Value;
+
+                        //Reset backstory-related lists
+                        if (generatedBackstoryInfo)
+                        {
+                            if (request.Faction != null)
+                                request.Faction.def.backstoryFilters = prevFactionBackstoryCategoryFilters.ListFullCopyOrNull();
+                            request.KindDef.backstoryCategories = prevPawnkindBackstoryCategories.ListFullCopyOrNull();
+                            request.KindDef.backstoryFilters = prevPawnkindBackstoryCategoryFilters.ListFullCopyOrNull();
+                            generatedBackstoryInfo = false;
+                        }
                     }
 
-                    justGeneratedRace = false;
                     IsPawnOfPlayerFaction = false;
-                    //PawnkindRaceDiversification.Logger.Message("Race selected successfully.");
+                    //Unpause the weight generator.
+                    weightGeneratorPaused = false;
+                    //Reset remembered pawnkind hair tags.
+                    prevPawnkindItemSettings = null;
+                    //Reset backstory-related things.
+                    prevFactionBackstoryCategoryFilters = null;
+                    prevPawnkindBackstoryCategories = null;
+                    prevPawnkindBackstoryCategoryFilters = null;
+                    //PawnkindRaceDiversification.Logger.Message("Race selected and reset successfully.");
                 }
-                //Unpause the weight generator.
-                weightGeneratorPaused = false;
-                //Reset remembered pawnkind hair tags.
-                prevPawnkindHairtags = null;
-                //Reset backstory-related things.
-                prevFactionBackstoryCategoryFilters = null;
-                prevPawnkindBackstoryCategories = null;
-                prevPawnkindBackstoryCategoryFilters = null;
             }
             catch (Exception e)
             {
                 if (PawnkindRaceDiversification.IsDebugModeInSettingsActive())
                 {
                     string err = "PRD encountered an error AFTER generating a pawn! Stacktrace: \n";
-                    err += "Error probably occured at line " + new StackTrace(e, true).GetFrame(0).GetFileLineNumber().ToString() + "\n";
                     err += e.ToString();
                     PawnkindRaceDiversification.Logger.Error(err);
                 }
@@ -223,8 +238,6 @@ namespace PawnkindRaceDiversification.Patches
             //Return the original pawnkind race if no race selected
             return pawnKind.race;
         }
-
-        /* !!!!This seems to have been deprecated in 1.3
         private static void HairFixProcedure(PawnKindDef pawnkindDef)
         {
             //HAR does not handle hair generation for pawnkinds, therefore I will fix this myself.
@@ -234,19 +247,27 @@ namespace PawnkindRaceDiversification.Patches
             //  However, pawns that are not supposed to spawn with hair should not have forced pawnkind hair gen.
             
             
-            if (pawnkindDef.hairTags != null)
+            if (pawnkindDef.styleItemTags != null)
             {
-                List<string> loadedHairTags = raceHairTagData[pawnkindDef.race.defName];
-                if (loadedHairTags != null
-                    && loadedHairTags.Count > 0
-                    && loadedHairTags[0] == "nohair")
+                Dictionary<Type, StyleSettings> loadedStyleSettings = raceStyleData.TryGetValue(pawnkindDef.race.defName);
+                if (loadedStyleSettings != null)
                 {
-                    prevPawnkindHairtags = pawnkindDef.hairTags;
-                    pawnkindDef.hairTags = null;
+                    List<StyleItemTagWeighted> newStyleItemTags = new List<StyleItemTagWeighted>();
+                    prevPawnkindItemSettings = pawnkindDef.styleItemTags;
+                    foreach (KeyValuePair<Type, StyleSettings> ts in loadedStyleSettings)
+                    {
+                        if (ts.Value != null
+                            && ts.Value.hasStyle
+                            && ts.Value.styleTags?.Count > 0)
+                        {
+                            foreach (string s in ts.Value.styleTags)
+                                newStyleItemTags.Add(new StyleItemTagWeighted(s, 1.0f));
+                            pawnkindDef.styleItemTags = newStyleItemTags;
+                        }
+                    }
                 }
             }
         }
-        */
 
         private static void BackstoryInjectionProcedure(PawnKindDef pawnkindDef, FactionDef factionDef)
         {

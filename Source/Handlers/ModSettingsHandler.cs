@@ -18,6 +18,7 @@ namespace PawnkindRaceDiversification.Handlers
         internal static SettingHandle<bool> OverridePawnsWithInconsistentAges = null;
         internal static Dictionary<string, float> setFlatWeights = new Dictionary<string, float>();
         internal static Dictionary<string, float> setLocalFlatWeights = new Dictionary<string, float>();
+        internal static Dictionary<string, float> setLocalWorldWeights = new Dictionary<string, float>();
         internal static List<SettingHandle<float>> allHandleReferences = new List<SettingHandle<float>>();
         internal static List<string> evaluatedRaces = new List<string>();
         internal const string showSettingsValid = "PawnkindRaceDiversity_Category_ShowSettings";
@@ -123,13 +124,8 @@ namespace PawnkindRaceDiversification.Handlers
                             else setFlatWeights.SetOrAdd(handleRace, val);
                             break;
                         case HandleContext.WORLD:
-                            setLocalFlatWeights.SetOrAdd(handle.Title, val);
-                            SettingHandle<float> lhandle = allHandleReferences.Find(h => h.Title == handle.Title && WhatContextIsID(h.Name) == HandleContext.LOCALS);
-                            if (lhandle != null)
-                            {
-                                lhandle.Value = val;
-                                lhandle.StringValue = val.ToString();
-                            }
+                            setLocalWorldWeights.SetOrAdd(handle.Title, val);
+                            SyncWorldWeightsIntoLocalWeights();
                             break;
                         case HandleContext.LOCALS:
                             setLocalFlatWeights.SetOrAdd(handle.Title, val);
@@ -141,7 +137,7 @@ namespace PawnkindRaceDiversification.Handlers
                 if (handle.Value >= 0.0f && context == HandleContext.GLOBALS)
                     setFlatWeights.SetOrAdd(race, handle.Value);
                 else if (context == HandleContext.WORLD)
-                    setLocalFlatWeights.SetOrAdd(race, handle.Value);
+                    setLocalWorldWeights.SetOrAdd(race, handle.Value);
                 else if (context == HandleContext.LOCALS)
                 {
                     foreach (SettingHandle<float> lh in allHandleReferences.FindAll(h => WhatContextIsID(h.Name) == HandleContext.LOCALS))
@@ -176,6 +172,20 @@ namespace PawnkindRaceDiversification.Handlers
             else if (id.StartsWith("flatGenerationWeight"))
                 return HandleContext.GLOBALS;
             return HandleContext.NONE;
+        }
+
+        internal static void SyncWorldWeightsIntoLocalWeights()
+        {
+            foreach (KeyValuePair<string, float> wv in setLocalWorldWeights)
+            {
+                setLocalFlatWeights.SetOrAdd(wv.Key, wv.Value);
+                SettingHandle<float> lhandle = allHandleReferences.Find(h => h.Title == wv.Key && WhatContextIsID(h.Name) == HandleContext.LOCALS);
+                if (lhandle != null)
+                {
+                    lhandle.Value = wv.Value;
+                    lhandle.StringValue = wv.Value.ToString();
+                }
+            }
         }
 
         private bool isInWorld()

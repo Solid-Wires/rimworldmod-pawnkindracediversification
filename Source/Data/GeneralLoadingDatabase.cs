@@ -1,4 +1,5 @@
 ﻿using AlienRace;
+using System;
 using System.Collections.Generic;
 using Verse;
 
@@ -7,8 +8,17 @@ namespace PawnkindRaceDiversification.Data
     internal sealed class GeneralLoadingDatabase
     {
         internal static List<string> impliedRacesLoaded = new List<string>();
-        internal static List<PawnKindDef> pawnKindDefsExcluded = new List<PawnKindDef>();
-        internal static Dictionary<PawnKindDef, string> pawnKindRaceDefRelations = new Dictionary<PawnKindDef, string>();
-        internal static Dictionary<string, List<string>> raceHairTagData = new Dictionary<string, List<string>>();
+        internal static List<string> pawnKindDefsExcluded = new List<string>();
+        internal static Dictionary<string, string> pawnKindRaceDefRelations = new Dictionary<string, string>();
+        internal static Dictionary<string, Dictionary<Type, StyleSettings>> raceStyleData = new Dictionary<string, Dictionary<Type, StyleSettings>>();
+
+        public static void AddOrInsertStyle(string defName, Type type, StyleSettings style)
+        {
+            if (raceStyleData.ContainsKey(defName))
+                raceStyleData[defName].Add(type, style);
+            else
+                raceStyleData.Add(defName, new Dictionary<Type, StyleSettings>() { {type, style} }) ;
+            
+        }
     }
 }

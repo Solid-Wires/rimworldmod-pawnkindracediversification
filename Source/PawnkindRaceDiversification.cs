@@ -14,12 +14,14 @@ using UnityEngine.SceneManagement;
 using PawnkindRaceDiversification.UI;
 using static PawnkindRaceDiversification.Data.GeneralLoadingDatabase;
 using static PawnkindRaceDiversification.Extensions.ExtensionDatabase;
+using PawnkindRaceDiversification.Data;
 
 namespace PawnkindRaceDiversification
 {
     public class PawnkindRaceDiversification : ModBase
     {
         internal static PawnkindRaceDiversification Instance { get; private set; }
+        internal static int versionID = 29;
         internal static Harmony harmony => new Harmony("SEW_PRD_Harmony");
         internal static ModSettingsWorldStorage worldSettings = null;
         internal ModSettingsHandler SettingsHandler { get; private set; }
@@ -86,6 +88,9 @@ namespace PawnkindRaceDiversification
         {
             base.Initialize();
 
+            //Print the version of PRD
+            Logger.Message("Initialized PRD version " + versionID.ToString());
+
             //Find all active mods that this mod seeks.
             List<Assembly> mods = HugsLibUtility.GetAllActiveAssemblies().ToList();
             foreach (Assembly m in mods)
@@ -147,11 +152,9 @@ namespace PawnkindRaceDiversification
                     //Add this race to the databases
                     raceNames.Add(def.defName);
                     racesLoaded.Add(def.defName, def);
-                    if (def.alienRace.hairSettings == null
-                        || def.alienRace.hairSettings.hasHair)
-                        raceHairTagData.Add(def.defName, def.alienRace.hairSettings?.hairTags);
-                    else
-                        raceHairTagData.Add(def.defName, new List<string>() { "nohair" });
+                    //Style settings
+                    foreach (KeyValuePair<Type, StyleSettings> style in def.alienRace?.styleSettings)
+                        GeneralLoadingDatabase.AddOrInsertStyle(def.defName, style.Key, style.Value);
 
                     //Get all values from extensions
                     RaceDiversificationPool ext = def.GetModExtension<RaceDiversificationPool>();
@@ -203,9 +206,9 @@ namespace PawnkindRaceDiversification
                 //Look through all existing pawnkind defs
                 foreach (PawnKindDef def in kindDefs)
                 {
-                    pawnKindRaceDefRelations.Add(def, def.race.defName);
+                    pawnKindRaceDefRelations.Add(def.defName, def.race.defName);
                     if (def.GetModExtension<RaceRandomizationExcluded>() != null)
-                        pawnKindDefsExcluded.Add(def);
+                        pawnKindDefsExcluded.Add(def.defName);
                 }
 
                 SettingsHandler = new ModSettingsHandler();

@@ -1,9 +1,11 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 using Verse;
 
 namespace PawnkindRaceDiversification.Patches
@@ -15,10 +17,19 @@ namespace PawnkindRaceDiversification.Patches
 
         static HarmonyPatches()
         {
+            //Pawn generation hijacker
             Patch(AccessTools.Method(typeof(PawnGenerator), "GeneratePawn", new Type[]
             {
                 typeof(PawnGenerationRequest)
             }), typeof(PawnkindGenerationHijacker).GetMethod("DetermineRace"), typeof(PawnkindGenerationHijacker).GetMethod("AfterDeterminedRace"));
+            //World related settings
+            Patch(AccessTools.Method(typeof(WorldGenerator), "GenerateWorld", null),
+                typeof(WorldRelatedPatches).GetMethod("OnGeneratingWorld"));
+            Patch(AccessTools.Method(typeof(Page_CreateWorldParams), "DoWindowContents", new Type[]
+            {
+                typeof(Rect)
+            }),
+            null, null, typeof(WorldRelatedPatches).GetMethod("WorldWeightSettingsInWorldPage"));
         }
         internal static void PostInitPatches()
         {
