@@ -5,7 +5,7 @@
 	<PawnkindRaceDiversity_Category_ShowSettings>Show settings</PawnkindRaceDiversity_Category_ShowSettings>
 	<PawnkindRaceDiversity_Category_ShowAdjustments>Adjust</PawnkindRaceDiversity_Category_ShowAdjustments>
 	<PawnkindRaceDiversity_WeightWindowTitleGlobal>Global Weight Settings</PawnkindRaceDiversity_WeightWindowTitleGlobal>
-	<PawnkindRaceDiversity_WeightWindowTitleWorld>World Weight Settings</PawnkindRaceDiversity_WeightWindowTitleWorld>
+	<PawnkindRaceDiversity_WeightWindowTitleWorld>New World Weight Settings</PawnkindRaceDiversity_WeightWindowTitleWorld>
 	<PawnkindRaceDiversity_WeightWindowTitleLocal>Local Weight Settings</PawnkindRaceDiversity_WeightWindowTitleLocal>
 	<PawnkindRaceDiversity_ModAuthorsSettingsRemark>Race Author Settings</PawnkindRaceDiversity_ModAuthorsSettingsRemark>
 	<PawnkindRaceDiversity_AdjustmentWindowTitle>Adjustment</PawnkindRaceDiversity_AdjustmentWindowTitle>
@@ -41,4 +41,5 @@
 	<PawnkindRaceDiversity_FlatWeightsPerWorldGen_Category_description>Sets local save data of flat weights for new worlds you generate. If you want to start a world with specific aliens, modify this setting. This setting resets all values on every load to match global weights (no effects). This setting is only visible without a save loaded.</PawnkindRaceDiversity_FlatWeightsPerWorldGen_Category_description>
 	<PawnkindRaceDiversity_FlatWeightsLocal_Category_description>Sets local save data of weights in the current world you have loaded. Useful if you want to be very picky of what races you want to appear in a running game. This setting is only visible during a loaded save.</PawnkindRaceDiversity_FlatWeightsLocal_Category_description>
 	
+	<PawnkindRaceDiversity_PageCreateWorldParams_AlienWeights_Label>Alien Weights</PawnkindRaceDiversity_PageCreateWorldParams_AlienWeights_Label>
 </LanguageData>
