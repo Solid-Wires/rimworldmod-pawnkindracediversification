@@ -152,9 +152,12 @@ namespace PawnkindRaceDiversification
                     //Add this race to the databases
                     raceNames.Add(def.defName);
                     racesLoaded.Add(def.defName, def);
-                    //Style settings
+
+                    //Style settings (made obsolete thanks to HAR)
+                    /*
                     foreach (KeyValuePair<Type, StyleSettings> style in def.alienRace?.styleSettings)
                         GeneralLoadingDatabase.AddOrInsertStyle(def.defName, style.Key, style.Value);
+                    */
 
                     //Get all values from extensions
                     RaceDiversificationPool ext = def.GetModExtension<RaceDiversificationPool>();

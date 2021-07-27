@@ -72,7 +72,7 @@ namespace PawnkindRaceDiversification.Patches
                 {
                     //Change this kindDef's race to the selected race temporarily.
                     request.KindDef.race = WeightedRaceSelectionProcedure(request.KindDef, request.Faction);
-                    StyleFixProcedure(request.KindDef);
+                    //StyleFixProcedure(request.KindDef);
                     BackstoryInjectionProcedure(request.KindDef, request.Faction?.def);
 
                     IsPawnOfPlayerFaction = request.Faction != null ? request.Faction.IsPlayer : false;
@@ -238,6 +238,9 @@ namespace PawnkindRaceDiversification.Patches
             //Return the original pawnkind race if no race selected
             return pawnKind.race;
         }
+
+        /* Good news! Looking at HAR's code, this seems to have been made redundant.
+         * This will be commented out in case it is needed ever again.
         private static void StyleFixProcedure(PawnKindDef pawnkindDef)
         {
             //HAR does not handle hair generation for pawnkinds, therefore I will fix this myself.
@@ -283,6 +286,7 @@ namespace PawnkindRaceDiversification.Patches
                 }
             }
         }
+        */
 
         private static void BackstoryInjectionProcedure(PawnKindDef pawnkindDef, FactionDef factionDef)
         {
