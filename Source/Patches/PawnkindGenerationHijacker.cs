@@ -16,13 +16,17 @@ namespace PawnkindRaceDiversification.Patches
     {
         //This can be set to true to prevent pawns from being generated with race weights.
         private static bool weightGeneratorPaused = false;
+        private static int timesGeneratorPaused = 0;
         private static bool generatedBackstoryInfo = false;
-        private static List<StyleItemTagWeighted> prevPawnkindItemSettings = null;
+        //private static List<StyleItemTagWeighted> prevPawnkindItemSettings = null;
         private static List<BackstoryCategoryFilter> prevFactionBackstoryCategoryFilters = null;
         private static List<string> prevPawnkindBackstoryCategories = null;
         private static List<BackstoryCategoryFilter> prevPawnkindBackstoryCategoryFilters = null;
         public static void PauseWeightGeneration()
         {
+            //Every time weight generation is requested to be paused, the counter resets.
+            //  This is to avoid accidentally unpausing when it shouldn't be.
+            timesGeneratorPaused = 0;
             weightGeneratorPaused = true;
         }
         //public static bool DidRaceGenerate() => justGeneratedRace;
@@ -66,6 +70,14 @@ namespace PawnkindRaceDiversification.Patches
         //Harmony manual prefix method
         public static void DetermineRace(PawnGenerationRequest request)
         {
+            //Unpause the weight generator if the generator was paused 4 times.
+            if (timesGeneratorPaused >= 4)
+            {
+                if (ModSettingsHandler.DebugMode)
+                    PawnkindRaceDiversification.Logger.Warning("The race generator was left paused! Please report this to me! Unpausing the weight generator to avert this.");
+                weightGeneratorPaused = false;
+                timesGeneratorPaused = 0;
+            }
             try
             {
                 if (IsKindValid(request, true))
@@ -76,6 +88,9 @@ namespace PawnkindRaceDiversification.Patches
                     BackstoryInjectionProcedure(request.KindDef, request.Faction?.def);
 
                     IsPawnOfPlayerFaction = request.Faction != null ? request.Faction.IsPlayer : false;
+
+                    //Reset the failsafe (since it generated a pawn)
+                    timesGeneratorPaused = 0;
                     //PawnkindRaceDiversification.Logger.Message("Selecting race...");
                 }
             } catch (Exception e)
@@ -91,6 +106,9 @@ namespace PawnkindRaceDiversification.Patches
                     PawnkindRaceDiversification.Logger.Error(e.StackTrace.ToString());
                 }
             }
+            //Count the amount of times the generator was left paused.
+            if (weightGeneratorPaused)
+                timesGeneratorPaused++;
         }
         public static void AfterDeterminedRace(PawnGenerationRequest request)
         {
@@ -104,9 +122,11 @@ namespace PawnkindRaceDiversification.Patches
                     //Shouldn't have to null check this, but it could be possible...
                     if (request.KindDef != null)
                     {
-                        //Reset this kindDef's style settings
+                        //Reset this kindDef's style settings (obsolete)
+                        /*
                         if (prevPawnkindItemSettings != null)
                             request.KindDef.styleItemTags = prevPawnkindItemSettings.ListFullCopyOrNull();
+                        */
                         //Reset this kindDef's race
                         string raceDefName = pawnKindRaceDefRelations.TryGetValue(request.KindDef.defName);
                         request.KindDef.race = raceDefName != null ? racesLoaded.TryGetValue(raceDefName) : racesLoaded.First(r => r.Key.ToLower() == "human").Value;
@@ -123,10 +143,8 @@ namespace PawnkindRaceDiversification.Patches
                     }
 
                     IsPawnOfPlayerFaction = false;
-                    //Unpause the weight generator.
-                    weightGeneratorPaused = false;
-                    //Reset remembered pawnkind hair tags.
-                    prevPawnkindItemSettings = null;
+                    //Reset remembered pawnkind hair tags (obsolete).
+                    //prevPawnkindItemSettings = null;
                     //Reset backstory-related things.
                     prevFactionBackstoryCategoryFilters = null;
                     prevPawnkindBackstoryCategories = null;
@@ -147,6 +165,8 @@ namespace PawnkindRaceDiversification.Patches
                     PawnkindRaceDiversification.Logger.Error(e.StackTrace.ToString());
                 }
             }
+            //Unpause the weight generator (SHOULD ALWAYS UNPAUSE IF THIS METHOD RUNS AT ALL).
+            weightGeneratorPaused = false;
         }
 
         public static ThingDef WeightedRaceSelectionProcedure(PawnKindDef pawnKind, Faction faction)
