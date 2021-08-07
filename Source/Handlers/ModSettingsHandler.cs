@@ -215,9 +215,17 @@ namespace PawnkindRaceDiversification.Handlers
         //  Therefore, this method exists to fix any handles that are missing races.
         internal static void ResolveMissingRaces(ref Dictionary<string, float> handle, float placedWeight)
         {
-            foreach(string evalRace in evaluatedRaces)
+            Dictionary<string, float> hcopy = new Dictionary<string, float>(handle);
+
+            //Add new races to handler
+            foreach (string evalRace in evaluatedRaces)
                 if (!handle.ContainsKey(evalRace))
                     handle.SetOrAdd(evalRace, placedWeight);
+
+            //Remove missing races from handler
+            foreach (string key in hcopy.Keys)
+                if (!evaluatedRaces.Contains(key))
+                    handle.Remove(key);
         }
 
         internal static void ResetHandle(ref Dictionary<string, float> handle, HandleContext context)
