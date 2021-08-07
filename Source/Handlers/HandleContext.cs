@@ -2,9 +2,10 @@
 {
     public enum HandleContext
     {
-        GLOBALS,
-        LOCALS,
+        GENERAL,
+        LOCAL,
         WORLD,
+        STARTING,
         NONE
     }
 }

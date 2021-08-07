@@ -30,6 +30,14 @@ namespace PawnkindRaceDiversification.Patches
                 typeof(Rect)
             }),
             null, null, typeof(WorldRelatedPatches).GetMethod("WorldWeightSettingsInWorldPage"));
+            //World params will reset on CreateWorldParams resetting, ConfigureStartingPawns going next,
+            //  or from entering the main menu.
+            Patch(AccessTools.Method(typeof(Page_CreateWorldParams), "Reset", null),
+                null, typeof(WorldParamsReset).GetMethod("OnResetCreateWorldParams"));
+            Patch(AccessTools.Method(typeof(Page_ConfigureStartingPawns), "DoNext", null),
+                typeof(WorldParamsReset).GetMethod("OnResetCreateWorldParams"));
+            Patch(AccessTools.Method(typeof(GameDataSaveLoader), "LoadGame", new Type[] { typeof(string) }),
+                typeof(WorldParamsReset).GetMethod("OnResetCreateWorldParams"));
         }
         internal static void PostInitPatches()
         {

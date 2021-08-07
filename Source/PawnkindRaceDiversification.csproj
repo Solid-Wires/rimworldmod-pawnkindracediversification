@@ -81,14 +81,17 @@
     <Compile Include="Extensions\FactionWeight.cs" />
     <Compile Include="Extensions\RaceRandomizationExcluded.cs" />
     <Compile Include="Extensions\PawnkindWeight.cs" />
+    <Compile Include="Handlers\Old\ModSettingsWorldStorage.cs" />
+    <Compile Include="Patches\WorldParamsReset.cs" />
     <Compile Include="Patches\ChjeeDroidFixes.cs" />
     <Compile Include="Patches\WorldRelatedPatches.cs" />
     <Compile Include="Patches\PrepareCarefullyTweaks.cs" />
     <Compile Include="PawnkindRaceDiversification.cs" />
+    <Compile Include="UI\SelectWorldSettingWindow.cs" />
     <Compile Include="UI\WeightAdjustmentWindow.cs" />
     <Compile Include="UI\WeightSettingsWindow.cs" />
     <Compile Include="Handlers\HandleContext.cs" />
-    <Compile Include="Handlers\ModSettingsWorldStorage.cs" />
+    <Compile Include="Handlers\ModWorldSettingsHandler.cs" />
     <Compile Include="Patches\AnyModGeneratedPawn.cs" />
     <Compile Include="Patches\HarmonyPatches.cs" />
     <Compile Include="Patches\PawnkindGenerationHijacker.cs" />
@@ -101,6 +104,7 @@
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)..\1.3\Assemblies\"
 xcopy /c /h /y /s /e /q "$(ProjectDir)..\" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(SolutionName)\"
+rmdir /s /q "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(SolutionName)\Source\"
 echo Completed build: %25date%25 %25time%25</PostBuildEvent>
   </PropertyGroup>
 </Project>

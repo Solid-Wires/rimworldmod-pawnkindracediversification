@@ -12,6 +12,7 @@ namespace PawnkindRaceDiversification.UI
     {
         public HandleContext windowContext = HandleContext.NONE;
         private string windowTitle = "Weight Settings Window";
+        private string windowDesc = "No description";
         public override Vector2 InitialSize => new Vector2(760f, 730f);
 
         private Vector2 scrollPosition = new Vector2(0f, 0f);
@@ -30,14 +31,21 @@ namespace PawnkindRaceDiversification.UI
             this.onlyOneOfTypeAllowed = true;
             switch(windowContext)
             {
-                case HandleContext.GLOBALS:
-                    windowTitle = "PawnkindRaceDiversity_WeightWindowTitleGlobal";
+                case HandleContext.GENERAL:
+                    windowTitle = "PawnkindRaceDiversity_WeightWindowTitle_FlatWeights";
+                    windowDesc = "PawnkindRaceDiversity_WeightWindowDesc_FlatWeights";
                     break;
                 case HandleContext.WORLD:
-                    windowTitle = "PawnkindRaceDiversity_WeightWindowTitleWorld";
+                    windowTitle = "PawnkindRaceDiversity_WeightWindowTitle_FlatWeightsPerWorldGen";
+                    windowDesc = "PawnkindRaceDiversity_WeightWindowDesc_FlatWeightsPerWorldGen";
                     break;
-                case HandleContext.LOCALS:
-                    windowTitle = "PawnkindRaceDiversity_WeightWindowTitleLocal";
+                case HandleContext.STARTING:
+                    windowTitle = "PawnkindRaceDiversity_WeightWindowTitle_FlatWeightsStartingPawns";
+                    windowDesc = "PawnkindRaceDiversity_WeightWindowDesc_FlatWeightsStartingPawns";
+                    break;
+                case HandleContext.LOCAL:
+                    windowTitle = "PawnkindRaceDiversity_WeightWindowTitle_FlatWeightsLocal";
+                    windowDesc = "PawnkindRaceDiversity_WeightWindowDesc_FlatWeightsLocal";
                     break;
             }
             windowHandles = ModSettingsHandler.allHandleReferences;
@@ -59,15 +67,25 @@ namespace PawnkindRaceDiversification.UI
             Text.Font = GameFont.Medium;
             Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(windowTitleRect, Translator.Translate(windowTitle));
+            float windowTitleElementsYOffset = 28f;
+            //Window description
+            windowDescRect = new Rect(new Vector2(
+                inRect.x, inRect.y + windowTitleElementsYOffset),
+                new Vector2(
+                inRect.width, 40f)
+                );
+            Text.Font = GameFont.Small;
+            Text.Anchor = TextAnchor.MiddleCenter;
+            Widgets.Label(windowDescRect, Translator.Translate(windowDesc));
             Text.Font = prevFontSize;
             Text.Anchor = prevAnchor;
 
             Rect listingStandardRectOuter 
-                = new Rect(new Vector2(inRect.x + 5f, inRect.y + 40f), 
-                            new Vector2(inRect.width - 10f, inRect.height - 120f));
+                = new Rect(new Vector2(inRect.x + 5f, inRect.y + 40f + windowTitleElementsYOffset), 
+                            new Vector2(inRect.width - 10f, inRect.height - 120f - windowTitleElementsYOffset));
             Rect listingStandardRectInner
-                = new Rect(new Vector2(inRect.x + 10f, inRect.y + 45f),
-                            new Vector2(inRect.width - 20f, inRect.height - 130f));
+                = new Rect(new Vector2(inRect.x + 10f, inRect.y + 45f + windowTitleElementsYOffset),
+                            new Vector2(inRect.width - 20f, inRect.height - 130f - windowTitleElementsYOffset));
             Widgets.DrawMenuSection(listingStandardRectOuter);
             //Column title delimiter
             float tableStart = listingStandardRectOuter.x + 2f;
@@ -94,14 +112,14 @@ namespace PawnkindRaceDiversification.UI
             Widgets.BeginScrollView(new Rect(0f, 20f, listingStandardRectInner.width - 2f, listingStandardRectInner.height - 2f), ref scrollPosition, 
                 new Rect(listingStandardRectInner.x, listingStandardRectInner.y - (elementSize * 1.6f),
                         listingStandardRectInner.width, 
-                        (ModSettingsHandler.evaluatedRaces.Count * elementSize) + (elementSize * (1.6f / 4f))), 
+                        (ModSettingsHandler.evaluatedRaces.Count * elementSize) + (elementSize * (1.6f / 4f) - (windowTitleElementsYOffset / 2f))), 
                     true);
             int element = 0;
             float yPos = 0f;
             CalculateSpawnChances();
             foreach (string race in ModSettingsHandler.evaluatedRaces)
             {
-                yPos = element * elementSize;
+                yPos = (element * elementSize) + (windowTitleElementsYOffset / 2f);
                 element++;
                 Rect innerContentRect = new Rect(listingStandardRectInner.x, yPos, 180f, elementSize);
                 Text.Anchor = TextAnchor.MiddleLeft;
@@ -127,12 +145,12 @@ namespace PawnkindRaceDiversification.UI
                 //Spawn Chance
                 innerContentRect = new Rect(columnStart2 + 2f, yPos, 118f, elementSize);
                 Widgets.Label(innerContentRect, spawnChancesVisual[race].ToStringPercent());
-                //Def Adjusted
+                //Prev Adjusted
                 innerContentRect = new Rect(columnStart3 + 2f, yPos, 114f, elementSize);
-                if (!(race.ToLower() == "human" && windowContext == HandleContext.GLOBALS))
+                if (!(race.ToLower() == "human" && windowContext == HandleContext.GENERAL))
                 {
                     bool checkboxTmp = prevAdjustedRaces[race];
-                    Widgets.Checkbox(new Vector2(innerContentRect.x + (118f / 3f) + 5f, innerContentRect.y + 5f), ref checkboxTmp);
+                    Widgets.Checkbox(new Vector2(innerContentRect.x + (118f / 3f) + 5f, innerContentRect.y + 5f), ref checkboxTmp, 24f, false, true);
                     prevAdjustedRaces[race] = checkboxTmp;
                 }
                 //Actions
@@ -237,7 +255,7 @@ namespace PawnkindRaceDiversification.UI
             }
         }
 
-        public float GrabWeightReference(string race, HandleContext context)
+        public float GrabWeightReference(string race, HandleContext context, bool returnNegative = false)
         {
             string fullID = ModSettingsHandler.GetRaceSettingWeightID(context, race);
             if (fullID != null)
@@ -245,22 +263,25 @@ namespace PawnkindRaceDiversification.UI
                 SettingHandle<float> handle = windowHandles.FirstOrFallback(h => h.Name == fullID, null);
                 if (handle != null)
                 {
-                    if (prevAdjustedRaces[race])
+                    if ((prevAdjustedRaces[race] && windowContext == context) 
+                        || (handle.Value < 0.0f && windowContext != context))
                     {
+                        if (returnNegative)
+                            return -1.0f;
+
                         switch (context)
                         {
-                            case HandleContext.GLOBALS:
-                                if ((prevAdjustedRaces[race] && windowContext == HandleContext.GLOBALS)
-                                    || (handle.Value < 0.0f && windowContext != HandleContext.GLOBALS))
-                                {
-                                    KeyValuePair<string, RaceDiversificationPool> data = racesDiversified.FirstOrFallback(r => r.Key == race);
-                                    if (data.Key != null)
-                                        return data.Value.flatGenerationWeight;
-                                }
-                                break;
+                            case HandleContext.STARTING:
+                                return GrabWeightReference(race, HandleContext.WORLD);
                             case HandleContext.WORLD:
-                            case HandleContext.LOCALS:
-                                return GrabWeightReference(race, HandleContext.GLOBALS);
+                            case HandleContext.LOCAL:
+                                //This is performed so that it can also return the human's race setting
+                                return GrabWeightReference(race, HandleContext.GENERAL);
+                            case HandleContext.GENERAL:
+                                KeyValuePair<string, RaceDiversificationPool> data = racesDiversified.FirstOrFallback(r => r.Key == race);
+                                if (data.Key != null)
+                                    return data.Value.flatGenerationWeight;
+                                break;
                         }
                     }
                     //This does not display negatives (checkbox will check for that instead)
@@ -288,7 +309,7 @@ namespace PawnkindRaceDiversification.UI
                         prevAdjustedRaces[race] = false;
                     else if (value < 0.0f)
                     {
-                        if (race.ToLower() == "human" && windowContext == HandleContext.GLOBALS)
+                        if (race.ToLower() == "human" && windowContext == HandleContext.GENERAL)
                             value = handle.DefaultValue;
                         else
                             prevAdjustedRaces[race] = true;
@@ -347,6 +368,7 @@ namespace PawnkindRaceDiversification.UI
         }
 
         private Rect windowTitleRect;
+        private Rect windowDescRect;
         private Rect btnAccept;
         private Rect quickAdjustRect;
         private Vector2 regularButtonSize = new Vector2(160f, 46f);

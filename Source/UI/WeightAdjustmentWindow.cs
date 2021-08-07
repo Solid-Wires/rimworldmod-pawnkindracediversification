@@ -22,7 +22,7 @@ namespace PawnkindRaceDiversification.UI
         {
             this.parent = parent;
             this.raceAdjusting = raceAdjusting;
-            this.outFlatWeight = parent.windowHandles.Find(h => h.Title == raceAdjusting && ModSettingsHandler.WhatContextIsID(h.Name) == parent.windowContext).Value;
+            this.outFlatWeight = parent.GrabWeightReference(raceAdjusting, parent.windowContext, true);
             this.textField = outFlatWeight.ToString("0.0##");
             this.absorbInputAroundWindow = true;
             this.closeOnClickedOutside = false;
@@ -44,11 +44,20 @@ namespace PawnkindRaceDiversification.UI
             Text.Font = GameFont.Medium;
             Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(windowTitleRect, Translator.Translate(windowTitle));
+            //Race being adjusted
+            windowDescRect = new Rect(new Vector2(
+                inRect.x, inRect.y + 28f),
+                new Vector2(
+                inRect.width, 40f)
+                );
+            Text.Font = GameFont.Small;
+            Text.Anchor = TextAnchor.MiddleCenter;
+            Widgets.Label(windowDescRect, Translator.Translate("PawnkindRaceDiversity_TextboxLabel_Adjusting") + " " + raceAdjusting);
             Text.Font = prevFontSize;
             Text.Anchor = prevAnchor;
 
-            Rect weightAdjustmentRectLabel = new Rect(inRect.width - 210f, inRect.y + 60f, 105f, 24f);
-            Rect weightAdjustmentRect = new Rect(inRect.width - 110f, inRect.y + 60f, 76f, 24f);
+            Rect weightAdjustmentRectLabel = new Rect(inRect.width - 210f, inRect.y + 68f, 105f, 24f);
+            Rect weightAdjustmentRect = new Rect(inRect.width - 110f, inRect.y + 68f, 76f, 24f);
             float value = 0.0f;
             Widgets.Label(weightAdjustmentRectLabel, Translator.Translate("PawnkindRaceDiversity_TextboxLabel_SetFlatWeight"));
             string inp = Widgets.TextField(weightAdjustmentRect, textField);
@@ -72,11 +81,12 @@ namespace PawnkindRaceDiversification.UI
 
         public override void PreClose()
         {
-            parent.windowHandles.Find(h => h.Title == raceAdjusting && ModSettingsHandler.WhatContextIsID(h.Name) == parent.windowContext).Value = outFlatWeight;
+            parent.SetWeightReference(raceAdjusting, outFlatWeight);
             base.PreClose();
         }
 
         private Rect windowTitleRect;
+        private Rect windowDescRect;
         private Rect btnAccept;
         private Vector2 regularButtonSize = new Vector2(160f, 46f);
     }

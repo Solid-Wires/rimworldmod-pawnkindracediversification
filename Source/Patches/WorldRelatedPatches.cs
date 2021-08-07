@@ -45,7 +45,7 @@ namespace PawnkindRaceDiversification.Patches
         {
             Widgets.Label(new Rect(0f, num, width2, 30f), "PawnkindRaceDiversity_PageCreateWorldParams_AlienWeights_Label".Translate());
             if (Widgets.ButtonText(new Rect(200f, num, width2, 30f), "PawnkindRaceDiversity_Category_ShowAdjustments".Translate()))
-                Find.WindowStack.Add(new WeightSettingsWindow(HandleContext.WORLD));
+                Find.WindowStack.Add(new SelectWorldSettingWindow());
         }
     }
 }

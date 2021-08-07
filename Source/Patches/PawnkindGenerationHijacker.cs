@@ -44,9 +44,10 @@ namespace PawnkindRaceDiversification.Patches
                 *  5.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
                 *  6.) The weight generator isn't paused
                 *  7.) Prepare Carefully isn't doing anything
-                *  8.) kindDef is human and settings want to override all human pawnkinds
-                *  9.) The age of this request is consistent with the age of the race
-                *      OR  kindDef isn't human and settings want to override all alien pawnkinds.
+                *  8.) The age of this request is consistent with the age of the race
+                *  9.) kindDef is human and settings want to override all human pawnkinds
+                *       OR kindDef is not a human and settings want to override all alien pawnkinds
+                *       OR kindDef is not a human and world settings allow starting pawnkinds to be overridden
             * */
             if (request.KindDef != null
                 && (request.KindDef.RaceProps != null
@@ -61,7 +62,8 @@ namespace PawnkindRaceDiversification.Patches
                 (!contextBefore //Context after-determining is different at this point here
                 || (
                 ((request.KindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
-                || (request.KindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds))
+                || (request.KindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds)
+                || (request.KindDef.race != ThingDefOf.Human && request.Faction != null && request.Faction.IsPlayer && ModSettingsHandler.OverrideAllAlienPawnkindsFromStartingPawns))
                 )))
                 return true;
             return false;
@@ -182,6 +184,7 @@ namespace PawnkindRaceDiversification.Patches
              *      **If either of these weights are negative, then this pawn cannot spawn in these conditions
              * */
             Dictionary<string, float> determinedWeights = new Dictionary<string, float>();
+            string dbgstrList = "";
 
             foreach (KeyValuePair<string, RaceDiversificationPool> data in racesDiversified)
             {
@@ -218,22 +221,67 @@ namespace PawnkindRaceDiversification.Patches
                 if (w < 0.0f) determinedWeights.SetOrAdd(data.Key, pw + fw);
                 else determinedWeights.SetOrAdd(data.Key, w + pw + fw);
             }
-            //Flat generation weight, determined by user settings (applied globally)
+            //Flat generation weight, determined by user settings (applied generally)
             //  Overrides previous weight calculations.
             //  Prevented if race has a negative flat weight.
             foreach (KeyValuePair<string, float> kv in ModSettingsHandler.setFlatWeights)
             {
                 if (kv.Value >= 0.0f)
+                {
                     determinedWeights.SetOrAdd(kv.Key, kv.Value);
+                    if (ModSettingsHandler.DebugMode)
+                        dbgstrList += kv.Key + ": " + kv.Value + "\n";
+                }
             }
+            if (ModSettingsHandler.DebugMode)
+            {
+                PawnkindRaceDiversification.Logger.Message("Flat weights found: \n" + dbgstrList);
+                dbgstrList = "";
+            }
+
             //Flat generation weight, determined by user settings (applied locally)
             //  Overrides previous weight calculations.
             //  Prevented if race has a negative flat weight.
             foreach (KeyValuePair<string, float> kv in ModSettingsHandler.setLocalFlatWeights)
             {
                 if (kv.Value >= 0.0f)
+                {
                     determinedWeights.SetOrAdd(kv.Key, kv.Value);
+                    if (ModSettingsHandler.DebugMode)
+                        dbgstrList += kv.Key + ": " + kv.Value + "\n";
+                }
             }
+            if (ModSettingsHandler.DebugMode)
+            {
+                PawnkindRaceDiversification.Logger.Message("Local save weights found: \n" + dbgstrList);
+                dbgstrList = "";
+            }
+
+            //Flat generation weight, determined by user settings (applied for starting pawns - any pawn that is of player faction)
+            //  Overrides previous weight calculations.
+            //  Prevented if race has a negative flat weight.
+            if (faction != null && faction.IsPlayer)
+            {
+                foreach (KeyValuePair<string, float> kv in ModSettingsHandler.setLocalStartingPawnWeights)
+                {
+                    if (kv.Value >= 0.0f)
+                    {
+                        determinedWeights.SetOrAdd(kv.Key, kv.Value);
+                        if (ModSettingsHandler.DebugMode)
+                            dbgstrList += kv.Key + ": " + kv.Value + "\n";
+                    }
+                }
+            }
+            if (ModSettingsHandler.DebugMode)
+            {
+                PawnkindRaceDiversification.Logger.Message("Starting pawn weights found: \n" + dbgstrList);
+                dbgstrList = "";
+                foreach (KeyValuePair<string, float> w in determinedWeights)
+                    dbgstrList += w.Key + ": " + w.Value + "\n";
+                PawnkindRaceDiversification.Logger.Message("Final determined weights: \n" + dbgstrList);
+                dbgstrList = "";
+            }
+
             //Calculate race selection with a weighting procedure
             float sumOfWeights = 0.0f;
             foreach (KeyValuePair<string, float> w in determinedWeights)
