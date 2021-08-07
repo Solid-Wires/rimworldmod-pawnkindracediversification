@@ -22,7 +22,8 @@ namespace PawnkindRaceDiversification.Handlers
                 if (oldWorldSettings != null)
                 {
                     PawnkindRaceDiversification.Logger.Message("The old local settings object holder has been identified in this world. Transfering the local settings over to the new world component.");
-                    ModSettingsHandler.setLocalFlatWeights = oldWorldSettings.oldLocalFlatWeights;
+                    ModSettingsHandler.setLocalFlatWeights.Clear();
+                    ModSettingsHandler.setLocalFlatWeights.AddRange(oldWorldSettings.oldLocalFlatWeights);
                     ResolveMissingWeights();
                     ModSettingsHandler.UpdateHandleReferencesInAllReferences(ref ModSettingsHandler.setLocalFlatWeights, HandleContext.LOCAL);
                     Find.WorldObjects.Remove(oldWorldSettings);
