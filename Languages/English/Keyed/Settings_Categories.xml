@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+	<!-->Labels<-->
+	<!-->Window titles are also used for the setting categories<-->
+	<PawnkindRaceDiversity_WeightWindowTitle_FlatWeights>General Weight Settings</PawnkindRaceDiversity_WeightWindowTitle_FlatWeights>
+	<PawnkindRaceDiversity_WeightWindowTitle_FlatWeightsPerWorldGen>New World Weight Settings</PawnkindRaceDiversity_WeightWindowTitle_FlatWeightsPerWorldGen>
+	<PawnkindRaceDiversity_WeightWindowTitle_FlatWeightsStartingPawns>Starting Colonist Weight Settings</PawnkindRaceDiversity_WeightWindowTitle_FlatWeightsStartingPawns>
+	<PawnkindRaceDiversity_WeightWindowTitle_FlatWeightsLocal>Local Save Weight Settings</PawnkindRaceDiversity_WeightWindowTitle_FlatWeightsLocal>
+	<PawnkindRaceDiversity_ModAuthorsSettingsRemark>Race Author Settings</PawnkindRaceDiversity_ModAuthorsSettingsRemark>
+	
+	<!-->Descriptions<-->
+	<PawnkindRaceDiversity_FlatWeights_Category_description>These weights influence the chance of any pawn becoming a certain race. Any local setting set with "Prev Adjust" will fall back to general settings.</PawnkindRaceDiversity_FlatWeights_Category_description>
+	<!-->NOTE: The indented description below isn't used as of version 32<-->
+		<PawnkindRaceDiversity_FlatWeightsPerWorldGen_Category_description>Sets local save data of flat weights for new worlds you generate. If you want to start a world with specific aliens, modify this setting. This setting is only visible without a save loaded, and it's also available in the world settings screen.</PawnkindRaceDiversity_FlatWeightsPerWorldGen_Category_description>
+	<PawnkindRaceDiversity_FlatWeightsLocal_Category_description>Sets local save data of weights in the current world you have loaded. Useful if you want to be very picky of what races you want to appear in a running game. This setting is only visible during a loaded save.</PawnkindRaceDiversity_FlatWeightsLocal_Category_description>
+	<PawnkindRaceDiversity_WeightWindowDesc_FlatWeights>General weight settings of races that fill in the gaps of Prev Adjusted local weights. Prev Adjusted here are filled by a race mod using this mod's extension settings on their race.</PawnkindRaceDiversity_WeightWindowDesc_FlatWeights>
+	<PawnkindRaceDiversity_WeightWindowDesc_FlatWeightsPerWorldGen>New world weight settings of races in the world you are going to generate. Prev Adjusted here are filled by general weights. Adjusts local weights on world creation.</PawnkindRaceDiversity_WeightWindowDesc_FlatWeightsPerWorldGen>
+	<PawnkindRaceDiversity_WeightWindowDesc_FlatWeightsStartingPawns>Weight settings of races that your starting pawns generate as. Prev adjusted here are filled by world weights. Only applies to your starting colonists.</PawnkindRaceDiversity_WeightWindowDesc_FlatWeightsStartingPawns>
+	<PawnkindRaceDiversity_WeightWindowDesc_FlatWeightsLocal>Local weight settings of races in your current save. Prev Adjusted here are filled by general weights.</PawnkindRaceDiversity_WeightWindowDesc_FlatWeightsLocal>
+</LanguageData>

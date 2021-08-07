@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+	
+	<!-->Window title<-->
+	<PawnkindRaceDiversity_AdjustmentWindowTitle>Adjustment</PawnkindRaceDiversity_AdjustmentWindowTitle>
+	
+	<!-->Labels<-->
+	<PawnkindRaceDiversity_TextboxLabel_Adjusting>Adjusting:</PawnkindRaceDiversity_TextboxLabel_Adjusting>
+	<PawnkindRaceDiversity_TextboxLabel_SetFlatWeight>Set flat weight</PawnkindRaceDiversity_TextboxLabel_SetFlatWeight>
+</LanguageData>

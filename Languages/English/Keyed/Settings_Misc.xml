@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+	<!-->Miscellaneous<-->
+	<PawnkindRaceDiversity_Category_ShowSettings>Show settings</PawnkindRaceDiversity_Category_ShowSettings>
+	<PawnkindRaceDiversity_Category_ShowAdjustments>Adjust</PawnkindRaceDiversity_Category_ShowAdjustments>
+	
+	<!-->Displayed in world settings page<-->
+	<PawnkindRaceDiversity_PageCreateWorldParams_AlienWeights_Label>Alien Weights</PawnkindRaceDiversity_PageCreateWorldParams_AlienWeights_Label>
+	<PawnkindRaceDiversity_SelectSetting>Select setting...</PawnkindRaceDiversity_SelectSetting>
+	<PawnkindRaceDiversity_OverrideAllStartingAlienPawnkinds_label>Override starting alien pawnkinds</PawnkindRaceDiversity_OverrideAllStartingAlienPawnkinds_label>
+</LanguageData>

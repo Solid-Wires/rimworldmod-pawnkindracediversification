@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+	<!-->Labels<-->
+	<PawnkindRaceDiversity_WeightSettingColumnLabel_RaceDef>Race Def</PawnkindRaceDiversity_WeightSettingColumnLabel_RaceDef>
+	<PawnkindRaceDiversity_WeightSettingColumnLabel_FlatWeight>Weight</PawnkindRaceDiversity_WeightSettingColumnLabel_FlatWeight>
+	<PawnkindRaceDiversity_WeightSettingColumnLabel_SpawnChance>Spawn Chance</PawnkindRaceDiversity_WeightSettingColumnLabel_SpawnChance>
+	<PawnkindRaceDiversity_WeightSettingColumnLabel_AllowPrevAdjusted>Prev Adjusted</PawnkindRaceDiversity_WeightSettingColumnLabel_AllowPrevAdjusted>
+	<PawnkindRaceDiversity_WeightSettingColumnLabel_Action>Action</PawnkindRaceDiversity_WeightSettingColumnLabel_Action>
+	<PawnkindRaceDiversity_Checkbox_QuickAdjust>Quick adjust</PawnkindRaceDiversity_Checkbox_QuickAdjust>
+	
+	<!-->Description tooltips<-->
+	<PawnkindRaceDiversity_WeightSettingColumnTooltip_RaceDef>The race def of the alien. Some races might be dynamically hardcoded and will still appear here.</PawnkindRaceDiversity_WeightSettingColumnTooltip_RaceDef>
+	<PawnkindRaceDiversity_WeightSettingColumnTooltip_FlatWeight>The flat spawn weight of this race. It is a value that is set from 0.0 to 1.0, and influences the flat spawn chance of the race.</PawnkindRaceDiversity_WeightSettingColumnTooltip_FlatWeight>
+	<PawnkindRaceDiversity_WeightSettingColumnTooltip_SpawnChance>The flat chance that this race will spawn, calculated off of the weight divided by the sum of all the weights. Note that this does not take into account of chances related to spawning in factions or pawnkinds.</PawnkindRaceDiversity_WeightSettingColumnTooltip_SpawnChance>
+	<PawnkindRaceDiversity_WeightSettingColumnTooltip_AllowPrevAdjusted>Whether this race's weights here will fall back towards the previous setting. Set to false to adjust this race's weights manually here. These settings will default depending on the context (general to mod authors, world/local to general, etc).</PawnkindRaceDiversity_WeightSettingColumnTooltip_AllowPrevAdjusted>
+	<PawnkindRaceDiversity_WeightSettingColumnTooltip_Action>Choose what you want to do with this race's spawn conditions.</PawnkindRaceDiversity_WeightSettingColumnTooltip_Action>
+	<PawnkindRaceDiversity_CheckboxTooltip_QuickAdjust>Allows you to directly modify the weights listed.</PawnkindRaceDiversity_CheckboxTooltip_QuickAdjust>
+	
+	<!-->Button prompts<-->
+	<PawnkindRaceDiversity_Button_SetToZero>Set all to 0</PawnkindRaceDiversity_Button_SetToZero>
+	<PawnkindRaceDiversity_Button_SetToZero_Confirmation>Are you sure you want to set all weights to 0?</PawnkindRaceDiversity_Button_SetToZero_Confirmation>
+	<PawnkindRaceDiversity_Button_ResetToDefaults>Reset to Defaults</PawnkindRaceDiversity_Button_ResetToDefaults>
+	<PawnkindRaceDiversity_Button_ResetToDefaults_Confirmation>Are you sure you want to reset your weight settings here?</PawnkindRaceDiversity_Button_ResetToDefaults_Confirmation>
+</LanguageData>
