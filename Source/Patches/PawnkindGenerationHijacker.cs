@@ -17,11 +17,7 @@ namespace PawnkindRaceDiversification.Patches
         //This can be set to true to prevent pawns from being generated with race weights.
         private static bool weightGeneratorPaused = false;
         private static int timesGeneratorPaused = 0;
-        private static bool generatedBackstoryInfo = false;
-        //private static List<StyleItemTagWeighted> prevPawnkindItemSettings = null;
-        private static List<BackstoryCategoryFilter> prevFactionBackstoryCategoryFilters = null;
-        private static List<string> prevPawnkindBackstoryCategories = null;
-        private static List<BackstoryCategoryFilter> prevPawnkindBackstoryCategoryFilters = null;
+        public static bool IsPawnOfPlayerFaction { get; private set; } = false;
         public static void PauseWeightGeneration()
         {
             //Every time weight generation is requested to be paused, the counter resets.
@@ -29,10 +25,8 @@ namespace PawnkindRaceDiversification.Patches
             timesGeneratorPaused = 0;
             weightGeneratorPaused = true;
         }
-        //public static bool DidRaceGenerate() => justGeneratedRace;
-        public static bool IsPawnOfPlayerFaction { get; private set; } = false;
 
-        public static bool IsKindValid(PawnGenerationRequest request, bool contextBefore)
+        public static bool IsKindValid(PawnGenerationRequest request, bool checkingIfValidAtAll)
         {
             //These steps make sure whether it is really necessary to modify this pawn
             //   or not.
@@ -41,30 +35,29 @@ namespace PawnkindRaceDiversification.Patches
                 *  2.) kindDef is a humanlike
                 *  3.) kindDef isn't an excluded kind def
                 *  4.) raceDef isn't an implied race (pawnmorpher compatibility)
-                *  5.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
-                *  6.) The weight generator isn't paused
+                *  5.) The weight generator isn't paused
+                *  6.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
                 *  7.) Prepare Carefully isn't doing anything
                 *  8.) The age of this request is consistent with the age of the race
-                *  9.) kindDef is human and settings want to override all human pawnkinds
-                *       OR kindDef is not a human and settings want to override all alien pawnkinds
-                *       OR kindDef is not a human and world settings allow starting pawnkinds to be overridden
+                *  9.) Validator is checking if this request is valid at all from the above statements
+                *       OR OTHERWISE:
+                *           kindDef is human and settings want to override all human pawnkinds
+                *               OR kindDef is not a human and settings want to override all alien pawnkinds
+                *               OR kindDef is not a human and world settings allow starting pawnkinds to be overridden
             * */
             if (request.KindDef != null
                 && (request.KindDef.RaceProps != null
                     && request.KindDef.RaceProps.Humanlike)
                 && !(pawnKindDefsExcluded.Contains(request.KindDef.defName))
                 && !(impliedRacesLoaded.Contains(request.KindDef.race.defName))
-                && !(request.Faction != null && (request.Faction.def.defName == "PawnmorpherPlayerColony" || request.Faction.def.defName == "PawnmorpherEnclave"))
                 && !(weightGeneratorPaused)
+                && !(request.Faction != null && (request.Faction.def.defName == "PawnmorpherPlayerColony" || request.Faction.def.defName == "PawnmorpherEnclave"))
                 && !(PrepareCarefullyTweaks.loadedAlienRace != "none")
                 && (IsValidAge(request.KindDef, request))
-                && 
-                (!contextBefore //Context after-determining is different at this point here
-                || (
-                ((request.KindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
+                && (checkingIfValidAtAll
+                || ((request.KindDef.race == ThingDefOf.Human && ModSettingsHandler.OverrideAllHumanPawnkinds)
                 || (request.KindDef.race != ThingDefOf.Human && ModSettingsHandler.OverrideAllAlienPawnkinds)
-                || (request.KindDef.race != ThingDefOf.Human && request.Faction != null && request.Faction.IsPlayer && ModSettingsHandler.OverrideAllAlienPawnkindsFromStartingPawns))
-                )))
+                || (request.KindDef.race != ThingDefOf.Human && request.Faction != null && request.Faction.def.isPlayer && ModSettingsHandler.OverrideAllAlienPawnkindsFromStartingPawns))))
                 return true;
             return false;
         }
@@ -72,34 +65,34 @@ namespace PawnkindRaceDiversification.Patches
         //Harmony manual prefix method
         public static void DetermineRace(PawnGenerationRequest request)
         {
-            //Unpause the weight generator if the generator was paused 4 times.
-            if (timesGeneratorPaused >= 4)
-            {
-                if (ModSettingsHandler.DebugMode)
-                    PawnkindRaceDiversification.Logger.Warning("The race generator was left paused! Please report this to me! Unpausing the weight generator to avert this.");
-                weightGeneratorPaused = false;
-                timesGeneratorPaused = 0;
-            }
+            //Resetting procedure was moved to "before determining race" now.
+            //  Seems to solve a lot more problems than it causes on paper.
+            ResetRequest(request);
+
             try
             {
-                if (IsKindValid(request, true))
+                if (IsKindValid(request, false))
                 {
+                    if (ModSettingsHandler.DebugMode)
+                        PawnkindRaceDiversification.Logger.Message("Selecting race against " + request.KindDef.defName + "...");
+
                     //Change this kindDef's race to the selected race temporarily.
                     request.KindDef.race = WeightedRaceSelectionProcedure(request.KindDef, request.Faction);
+                    if (ModSettingsHandler.DebugMode)
+                        PawnkindRaceDiversification.Logger.Message("The race was chosen to be: " + request.KindDef.race.defName);
+
+                    //Everything below has reliant changes to the prevKindsSet.
                     //StyleFixProcedure(request.KindDef);
                     BackstoryInjectionProcedure(request.KindDef, request.Faction?.def);
 
-                    IsPawnOfPlayerFaction = request.Faction != null ? request.Faction.IsPlayer : false;
-
-                    //Reset the failsafe (since it generated a pawn)
-                    timesGeneratorPaused = 0;
-                    //PawnkindRaceDiversification.Logger.Message("Selecting race...");
+                    if (ModSettingsHandler.DebugMode)
+                        PawnkindRaceDiversification.Logger.Message("Race selected successfully to " + request.KindDef.race.defName + " against pawnkind " + request.KindDef.defName);
                 }
             } catch (Exception e)
             {
                 if (PawnkindRaceDiversification.IsDebugModeInSettingsActive())
                 {
-                    string err = "PRD encountered an error BEFORE generating a pawn! Stacktrace: \n";
+                    string err = "PRD encountered an error generating a pawn! Stacktrace: \n";
                     err += e.ToString();
                     PawnkindRaceDiversification.Logger.Error(err);
                 }
@@ -108,50 +101,69 @@ namespace PawnkindRaceDiversification.Patches
                     PawnkindRaceDiversification.Logger.Error(e.StackTrace.ToString());
                 }
             }
-            //Count the amount of times the generator was left paused.
-            if (weightGeneratorPaused)
-                timesGeneratorPaused++;
+            //Unpause the weight generator after one pawn was generated.
+            //  This is repaused if something is still generating pawns.
+            weightGeneratorPaused = false;
         }
+
+        //Harmony manual postfix method
+        /*  Made redundant because it has caused too many problems and was a massive headache.
         public static void AfterDeterminedRace(PawnGenerationRequest request)
         {
             try
             {
                 if (IsKindValid(request, false))
                 {
-                    //It's okay if this runs twice, because we want to be EXTRA sure that the pawnkind is fully reset
-                    //  after a race was selected.
-
-                    //Shouldn't have to null check this, but it could be possible...
-                    if (request.KindDef != null)
+                    //Debug information
+                    string dbgRaceDetermined = "(" + request.KindDef.race.defName + ") ";
+                    if (ModSettingsHandler.DebugMode)
                     {
-                        //Reset this kindDef's style settings (obsolete)
-                        /*
-                        if (prevPawnkindItemSettings != null)
-                            request.KindDef.styleItemTags = prevPawnkindItemSettings.ListFullCopyOrNull();
-                        */
-                        //Reset this kindDef's race
-                        string raceDefName = pawnKindRaceDefRelations.TryGetValue(request.KindDef.defName);
-                        request.KindDef.race = raceDefName != null ? racesLoaded.TryGetValue(raceDefName) : racesLoaded.First(r => r.Key.ToLower() == "human").Value;
-
-                        //Reset backstory-related lists
-                        if (generatedBackstoryInfo)
-                        {
-                            if (request.Faction != null)
-                                request.Faction.def.backstoryFilters = prevFactionBackstoryCategoryFilters.ListFullCopyOrNull();
-                            request.KindDef.backstoryCategories = prevPawnkindBackstoryCategories.ListFullCopyOrNull();
-                            request.KindDef.backstoryFilters = prevPawnkindBackstoryCategoryFilters.ListFullCopyOrNull();
-                            generatedBackstoryInfo = false;
-                        }
+                        PawnkindRaceDiversification.Logger.Message(dbgRaceDetermined + "Resetting pawnkind for " + request.KindDef.defName + " of faction " + (request.Faction?.def).ToStringSafe() + "...");
+                        string dbstrb = "";
+                        dbstrb += "\n Pawnkind faction backstory category filters: \n";
+                        if (request.Faction?.def?.backstoryFilters != null)
+                            foreach (BackstoryCategoryFilter filter in request.Faction.def.backstoryFilters)
+                                foreach (string tag in filter.categories)
+                                    dbstrb += tag + "\n";
+                        else
+                            dbstrb += "No backstories found for faction backstory filters \n";
+                        dbstrb += "\n Pawnkind backstory category filters: \n";
+                        if (request.KindDef?.backstoryFilters != null)
+                            foreach (BackstoryCategoryFilter filter in request.KindDef.backstoryFilters)
+                                foreach (string tag in filter.categories)
+                                    dbstrb += tag + "\n";
+                        else
+                            dbstrb += "No backstories found for pawnkind backstory filters \n";
+                        dbstrb += "\n Pawnkind backstory categories: \n";
+                        if (request.KindDef?.backstoryCategories != null)
+                            foreach (string tag in request.KindDef.backstoryCategories)
+                                dbstrb += tag + "\n";
+                        else
+                            dbstrb += "No backstories found for pawnkind backstory categories \n\n";
+                        PawnkindRaceDiversification.Logger.Message(dbgRaceDetermined + "After determined backstory info: " + dbstrb);
                     }
+                    PrevKindSettings pks = null;
+                    if (prevKindsSet.Count > 0)
+                        pks = prevKindsSet[prevKindsSet.Count - 1];
+                    if (pks == null)
+                    {
+                        if (ModSettingsHandler.DebugMode)
+                            PawnkindRaceDiversification.Logger.Error(dbgRaceDetermined + " This race never modified any settings to begin with!");
+                    }
+                    else
+                    {
+                        //Shouldn't have to null check this, but it could be possible...
+                        if (request.KindDef != null)
+                        {
+                            
+                        }
 
-                    IsPawnOfPlayerFaction = false;
-                    //Reset remembered pawnkind hair tags (obsolete).
-                    //prevPawnkindItemSettings = null;
-                    //Reset backstory-related things.
-                    prevFactionBackstoryCategoryFilters = null;
-                    prevPawnkindBackstoryCategories = null;
-                    prevPawnkindBackstoryCategoryFilters = null;
-                    //PawnkindRaceDiversification.Logger.Message("Race selected and reset successfully.");
+                        //Remove this kind set
+                        prevKindsSet.Remove(pks);
+                        if (ModSettingsHandler.DebugMode)
+                            PawnkindRaceDiversification.Logger.Message(dbgRaceDetermined + "Pawnkind reset successfully to " + request.KindDef.race.defName + " for pawnkind " + request.KindDef.defName);
+                        
+                    }
                 }
             }
             catch (Exception e)
@@ -166,9 +178,25 @@ namespace PawnkindRaceDiversification.Patches
                 {
                     PawnkindRaceDiversification.Logger.Error(e.StackTrace.ToString());
                 }
+                weightGeneratorPaused = false;
             }
-            //Unpause the weight generator (SHOULD ALWAYS UNPAUSE IF THIS METHOD RUNS AT ALL).
-            weightGeneratorPaused = false;
+        }
+        */
+
+        //Reset the PawnGenerationRequest.
+        private static void ResetRequest(PawnGenerationRequest request)
+        {
+            if (IsKindValid(request, true))
+            {
+                //Reset this kindDef's race
+                string raceDefName = pawnKindRaceDefRelations.TryGetValue(request.KindDef.defName);
+                request.KindDef.race = raceDefName != null ? racesLoaded.TryGetValue(raceDefName) : racesLoaded.First(r => r.Key.ToLower() == "human").Value;
+                //Always reset the pawn's backstory information before determining race.
+                if (request.Faction != null)
+                    request.Faction.def.backstoryFilters = defaultFactionBackstorySettings[request.Faction.def.defName].ListFullCopyOrNull();
+                request.KindDef.backstoryCategories = defaultKindBackstorySettings[request.KindDef.defName].prevPawnkindBackstoryCategories.ListFullCopyOrNull();
+                request.KindDef.backstoryFilters = defaultKindBackstorySettings[request.KindDef.defName].prevPawnkindBackstoryCategoryFilters.ListFullCopyOrNull();
+            }
         }
 
         public static ThingDef WeightedRaceSelectionProcedure(PawnKindDef pawnKind, Faction faction)
@@ -260,7 +288,7 @@ namespace PawnkindRaceDiversification.Patches
             //Flat generation weight, determined by user settings (applied for starting pawns - any pawn that is of player faction)
             //  Overrides previous weight calculations.
             //  Prevented if race has a negative flat weight.
-            if (faction != null && faction.IsPlayer)
+            if (faction != null && faction.def.isPlayer)
             {
                 foreach (KeyValuePair<string, float> kv in ModSettingsHandler.setLocalStartingPawnWeights)
                 {
@@ -271,6 +299,11 @@ namespace PawnkindRaceDiversification.Patches
                             dbgstrList += kv.Key + ": " + kv.Value + "\n";
                     }
                 }
+            }
+            else
+            {
+                if (ModSettingsHandler.DebugMode)
+                    PawnkindRaceDiversification.Logger.Warning("This pawn wasn't a part of the player faction (of " + faction.ToStringSafe() + ", " + (faction?.def?.isPlayer).ToStringSafe() + ") ");
             }
             if (ModSettingsHandler.DebugMode)
             {
@@ -363,16 +396,19 @@ namespace PawnkindRaceDiversification.Patches
              *      2.) Faction backstories
              *      3.) General backstories
              */
-            string race = pawnkindDef.race.defName;
+            string race = pawnkindDef.race.defName; //Because the race should've been assigned to already
+
             if (racesDiversified.ContainsKey(race))
             {
+                if (ModSettingsHandler.DebugMode)
+                    PawnkindRaceDiversification.Logger.Message("Correcting backstory information for " + race + "... ");
+
                 //Extension data
                 RaceDiversificationPool raceExtensionData = racesDiversified[race];
                 FactionWeight factionWeightData = null;
                 if (factionDef != null)
                     factionWeightData = raceExtensionData.factionWeights?.FirstOrFallback(w => w.factionDef == factionDef.defName);
                 PawnkindWeight pawnkindWeightData = raceExtensionData.pawnKindWeights?.FirstOrFallback(w => w.pawnKindDef == pawnkindDef.defName);
-                
 
                 //Handled backstory data
                 List<string> backstoryCategories = new List<string>();
@@ -386,7 +422,7 @@ namespace PawnkindRaceDiversification.Patches
                 backstoryPawnkindFilters.AddRange(pawnkindWeightData?.backstoryFilters ?? new List<BackstoryCategoryFilter>());
                 pawnkindBackstoryOverride = pawnkindWeightData != null ? pawnkindWeightData.overrideBackstories : false;
                 if (!pawnkindBackstoryOverride
-                && !raceExtensionData.overrideBackstories)
+                && !(raceExtensionData.overrideBackstories))
                 {
                     backstoryCategories.AddRange(pawnkindDef.backstoryCategories ?? new List<string>());
                     backstoryPawnkindFilters.AddRange(pawnkindDef.backstoryFilters ?? new List<BackstoryCategoryFilter>());
@@ -397,7 +433,7 @@ namespace PawnkindRaceDiversification.Patches
                     backstoryFactionFilters.AddRange(factionWeightData?.backstoryFilters ?? new List<BackstoryCategoryFilter>());
                     factionBackstoryOverride = factionWeightData != null ? factionWeightData.overrideBackstories : false;
                     if (!factionBackstoryOverride
-                    && !raceExtensionData.overrideBackstories)
+                    && !(raceExtensionData.overrideBackstories))
                     {
                         backstoryFactionFilters.AddRange(factionDef?.backstoryFilters ?? new List<BackstoryCategoryFilter>());
                     }
@@ -408,56 +444,59 @@ namespace PawnkindRaceDiversification.Patches
                     backstoryCategories.AddRange(raceExtensionData.backstoryCategories ?? new List<string>());
                     backstoryFactionFilters.AddRange(raceExtensionData.backstoryFilters ?? new List<BackstoryCategoryFilter>());
                 }
-                
+
                 //Failsafe
                 if (backstoryFactionFilters.Count == 0
                     && backstoryPawnkindFilters.Count == 0
                     && backstoryCategories.Count == 0)
                 {
                     //Nothing happened here.
+                    if (ModSettingsHandler.DebugMode)
+                        PawnkindRaceDiversification.Logger.Warning("Race did not get any backstories!");
                     return;
                 }
-
-                //Back up the previous backstory information, so that we are not overriding it afterwards
-                prevFactionBackstoryCategoryFilters = factionDef?.backstoryFilters.ListFullCopyOrNull();
-                prevPawnkindBackstoryCategories = pawnkindDef.backstoryCategories.ListFullCopyOrNull();
-                prevPawnkindBackstoryCategoryFilters = pawnkindDef.backstoryFilters.ListFullCopyOrNull();
-                generatedBackstoryInfo = true;
 
                 //Assignment
                 if (factionDef != null)
                     factionDef.backstoryFilters = backstoryFactionFilters;
                 pawnkindDef.backstoryCategories = backstoryCategories;
                 pawnkindDef.backstoryFilters = backstoryPawnkindFilters;
+
+                if (ModSettingsHandler.DebugMode)
+                    PawnkindRaceDiversification.Logger.Message("Backstories selected successfully.");
             }
+            else
+                if (ModSettingsHandler.DebugMode)
+                    PawnkindRaceDiversification.Logger.Message(race + " does not have any extension data, therefore it cannot override backstories.");
         }
 
-        //Returns false if any conditions are met that would invalidate the age.
-        private static bool IsValidAge(PawnKindDef kindDef, PawnGenerationRequest request)
-        {
-            /*
-            if (ModSettingsHandler.DebugMode)
-                PawnkindRaceDiversification.Logger.Message("Generated biological age: " + biologicalAge.ToString() + "\n"
-                    + "Minimum allowed age: " + kindDef.race.race.ageGenerationCurve.Points[0].x.ToString() + "\n"
-                    + "Maximum allowed age: " + kindDef.race.race.ageGenerationCurve.Points[kindDef.race.race.ageGenerationCurve.Points.Capacity - 1].x.ToString());
-            */
-            //Only invalidates if settings don't allow age overriding
-            if (!ModSettingsHandler.OverridePawnsWithInconsistentAges)
+            //Returns false if any conditions are met that would invalidate the age.
+            private static bool IsValidAge(PawnKindDef kindDef, PawnGenerationRequest request)
             {
-                //Invalid if younger than or older than what's supposed to be generated (doesn't appear to be used)
                 /*
-                if (kindDef.race.race.ageGenerationCurve.Points[0].x > biologicalAge
-                    || kindDef.race.race.ageGenerationCurve.Points[kindDef.race.race.ageGenerationCurve.Points.Capacity - 1].x < biologicalAge)
-                {
-                    return false;
-                }
+                if (ModSettingsHandler.DebugMode)
+                    PawnkindRaceDiversification.Logger.Message("Generated biological age: " + biologicalAge.ToString() + "\n"
+                        + "Minimum allowed age: " + kindDef.race.race.ageGenerationCurve.Points[0].x.ToString() + "\n"
+                        + "Maximum allowed age: " + kindDef.race.race.ageGenerationCurve.Points[kindDef.race.race.ageGenerationCurve.Points.Capacity - 1].x.ToString());
                 */
-                //Invalid if generated as a newborn or the kindDef's min and max generated age is 0
-                //  Assumed to be a child
-                if (request.Newborn || (kindDef.minGenerationAge == 0 && kindDef.maxGenerationAge == 0))
-                    return false;
-            }
-            return true;
+                //Only invalidates if settings don't allow age overriding
+                if (!ModSettingsHandler.OverridePawnsWithInconsistentAges)
+                {
+                    //Invalid if younger than or older than what's supposed to be generated (doesn't appear to be used)
+                    /*
+                    if (kindDef.race.race.ageGenerationCurve.Points[0].x > biologicalAge
+                        || kindDef.race.race.ageGenerationCurve.Points[kindDef.race.race.ageGenerationCurve.Points.Capacity - 1].x < biologicalAge)
+                    {
+                        return false;
+                    }
+                    */
+                    //Invalid if generated as a newborn or the kindDef's min and max generated age is 0
+                    //  Assumed to be a child
+                    if (request.Newborn || (kindDef.minGenerationAge == 0 && kindDef.maxGenerationAge == 0))
+                        return false;
+                }
+                return true;
+
         }
     }
 }

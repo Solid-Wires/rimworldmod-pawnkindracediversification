@@ -21,7 +21,7 @@ namespace PawnkindRaceDiversification
     public class PawnkindRaceDiversification : ModBase
     {
         internal static PawnkindRaceDiversification Instance { get; private set; }
-        internal static int versionID = 32;
+        internal static int versionID = 33;
         internal static Harmony harmony => new Harmony("SEW_PRD_Harmony");
         internal ModSettingsHandler SettingsHandler { get; private set; }
         internal static List<SeekedMod> activeSeekedMods = new List<SeekedMod>();
@@ -122,6 +122,8 @@ namespace PawnkindRaceDiversification
                                                             select x).ToList();
                 List<PawnKindDef> kindDefs = (from x in DefDatabase<PawnKindDef>.AllDefs
                                               select x).ToList();
+                List<FactionDef> factionDefs = (from x in DefDatabase<FactionDef>.AllDefs
+                                              select x).ToList();
                 //Search through all alien race defs
                 foreach (ThingDef_AlienRace def in alienRaceDefs)
                 {
@@ -211,6 +213,17 @@ namespace PawnkindRaceDiversification
                     pawnKindRaceDefRelations.Add(def.defName, def.race.defName);
                     if (def.GetModExtension<RaceRandomizationExcluded>() != null)
                         pawnKindDefsExcluded.Add(def.defName);
+
+                    //Backstory database for pawnkinds
+                    PrevKindSettings kindBackstorySettings = new PrevKindSettings();
+                    kindBackstorySettings.prevPawnkindBackstoryCategoryFilters = def.backstoryFilters;
+                    kindBackstorySettings.prevPawnkindBackstoryCategories = def.backstoryCategories;
+                    defaultKindBackstorySettings.Add(def.defName, kindBackstorySettings);
+                }
+                foreach (FactionDef def in factionDefs)
+                {
+                    //Backstory database for factions
+                    defaultFactionBackstorySettings.Add(def.defName, def.backstoryFilters);
                 }
 
                 SettingsHandler = new ModSettingsHandler();

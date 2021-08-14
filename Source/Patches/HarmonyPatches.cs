@@ -43,7 +43,7 @@ namespace PawnkindRaceDiversification.Patches
         {
             //Altered Carbon
             ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.ALTERED_CARBON, "CustomizeSleeveWindow", "GetNewPawn", null,
-                typeof(AnyModGeneratedPawn).GetMethod("OnModGeneratedPawn"));
+                typeof(AnyModGeneratedPawn).GetMethod("OnModGeneratingPawn"));
             //Prepare Carefully
             ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.PREPARE_CAREFULLY, "ColonistSaver", "SaveToFile", null,
                 null, null, typeof(PrepareCarefullyTweaks).GetMethod("SavingMethodInsertionTranspiler"));
@@ -58,7 +58,9 @@ namespace PawnkindRaceDiversification.Patches
                 null, null, typeof(ChjeeDroidFixes).GetMethod("PawnHostilitySettingFix"));
             //Character Editor
             ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.CHARACTER_EDITOR, "PresetPawnNew", "GeneratePawn", null,
-                typeof(AnyModGeneratedPawn).GetMethod("OnModGeneratedPawn"));
+                typeof(AnyModGeneratedPawn).GetMethod("OnModGeneratingPawn"));
+            ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.CHARACTER_EDITOR, "PawnxTool", "ReplacePawnWithPawnOfSameRace", null,
+                typeof(AnyModGeneratedPawn).GetMethod("OnModGeneratingPawn"));
         }
 
         private static void ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod modToPatch, string className, string targetMethod, Type[] parameters = null,

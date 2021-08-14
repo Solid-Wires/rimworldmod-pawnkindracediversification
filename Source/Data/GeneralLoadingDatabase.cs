@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Verse;
+using RimWorld;
 
 namespace PawnkindRaceDiversification.Data
 {
@@ -10,18 +11,12 @@ namespace PawnkindRaceDiversification.Data
         internal static List<string> impliedRacesLoaded = new List<string>();
         internal static List<string> pawnKindDefsExcluded = new List<string>();
         internal static Dictionary<string, string> pawnKindRaceDefRelations = new Dictionary<string, string>();
-
-        //Obsolete
-        //internal static Dictionary<string, Dictionary<Type, StyleSettings>> raceStyleData = new Dictionary<string, Dictionary<Type, StyleSettings>>();
-        /*
-        public static void AddOrInsertStyle(string defName, Type type, StyleSettings style)
+        internal class PrevKindSettings
         {
-            if (raceStyleData.ContainsKey(defName))
-                raceStyleData[defName].Add(type, style);
-            else
-                raceStyleData.Add(defName, new Dictionary<Type, StyleSettings>() { {type, style} }) ;
-            
+            public List<string> prevPawnkindBackstoryCategories = null;
+            public List<BackstoryCategoryFilter> prevPawnkindBackstoryCategoryFilters = null;
         }
-        */
+        internal static Dictionary<string, List<BackstoryCategoryFilter>> defaultFactionBackstorySettings = new Dictionary<string, List<BackstoryCategoryFilter>>();
+        internal static Dictionary<string, PrevKindSettings> defaultKindBackstorySettings = new Dictionary<string, PrevKindSettings>();
     }
 }
