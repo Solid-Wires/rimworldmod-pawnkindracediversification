@@ -21,7 +21,7 @@ namespace PawnkindRaceDiversification.Patches
             Patch(AccessTools.Method(typeof(PawnGenerator), "GeneratePawn", new Type[]
             {
                 typeof(PawnGenerationRequest)
-            }), typeof(PawnkindGenerationHijacker).GetMethod("DetermineRace"), typeof(PawnkindGenerationHijacker).GetMethod("AfterDeterminedRace"));
+            }), typeof(PawnkindGenerationHijacker).GetMethod("DetermineRace"));
             //World related settings
             Patch(AccessTools.Method(typeof(WorldGenerator), "GenerateWorld", null),
                 typeof(WorldRelatedPatches).GetMethod("OnGeneratingWorld"));
