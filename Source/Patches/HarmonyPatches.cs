@@ -57,7 +57,7 @@ namespace PawnkindRaceDiversification.Patches
             ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.ANDROIDS, "DroidUtility", "MakeDroidTemplate", null,
                 null, null, typeof(ChjeeDroidFixes).GetMethod("PawnHostilitySettingFix"));
             //Character Editor
-            ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.CHARACTER_EDITOR, "PresetPawnNew", "GeneratePawn", null,
+            ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.CHARACTER_EDITOR, "PresetPawn", "GeneratePawn", null,
                 typeof(AnyModGeneratedPawn).GetMethod("OnModGeneratingPawn"));
             ApplyPatchIntoMod(PawnkindRaceDiversification.SeekedMod.CHARACTER_EDITOR, "PawnxTool", "ReplacePawnWithPawnOfSameRace", null,
                 typeof(AnyModGeneratedPawn).GetMethod("OnModGeneratingPawn"));

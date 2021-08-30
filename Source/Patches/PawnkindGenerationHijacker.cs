@@ -16,13 +16,9 @@ namespace PawnkindRaceDiversification.Patches
     {
         //This can be set to true to prevent pawns from being generated with race weights.
         private static bool weightGeneratorPaused = false;
-        private static int timesGeneratorPaused = 0;
         public static bool IsPawnOfPlayerFaction { get; private set; } = false;
         public static void PauseWeightGeneration()
         {
-            //Every time weight generation is requested to be paused, the counter resets.
-            //  This is to avoid accidentally unpausing when it shouldn't be.
-            timesGeneratorPaused = 0;
             weightGeneratorPaused = true;
         }
 

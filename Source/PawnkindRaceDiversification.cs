@@ -21,7 +21,7 @@ namespace PawnkindRaceDiversification
     public class PawnkindRaceDiversification : ModBase
     {
         internal static PawnkindRaceDiversification Instance { get; private set; }
-        internal static int versionID = 33;
+        internal static int versionID = 34;
         internal static Harmony harmony => new Harmony("SEW_PRD_Harmony");
         internal ModSettingsHandler SettingsHandler { get; private set; }
         internal static List<SeekedMod> activeSeekedMods = new List<SeekedMod>();
