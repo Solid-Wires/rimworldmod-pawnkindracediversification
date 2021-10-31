@@ -8,4 +8,10 @@
 	<PawnkindRaceDiversity_PageCreateWorldParams_AlienWeights_Label>Alien Weights</PawnkindRaceDiversity_PageCreateWorldParams_AlienWeights_Label>
 	<PawnkindRaceDiversity_SelectSetting>Select setting...</PawnkindRaceDiversity_SelectSetting>
 	<PawnkindRaceDiversity_OverrideAllStartingAlienPawnkinds_label>Override starting alien pawnkinds</PawnkindRaceDiversity_OverrideAllStartingAlienPawnkinds_label>
+
+	<!-->Misc window titles<-->
+	<PawnkindRaceDiversity_FactionExclusionWindowTitle>Faction exclusion</PawnkindRaceDiversity_FactionExclusionWindowTitle>
+	
+	<!-->Misc window descriptions<-->
+	<PawnkindRaceDiversity_FactionExclusionWindowDescription>Factions that will never have their pawnkind races overridden by this mod. Useful for existing monoracial or pseudodiverse factions (Note: this setting is general).</PawnkindRaceDiversity_FactionExclusionWindowDescription>
 </LanguageData>
