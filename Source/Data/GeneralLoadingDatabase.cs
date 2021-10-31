@@ -10,6 +10,7 @@ namespace PawnkindRaceDiversification.Data
     {
         internal static List<string> impliedRacesLoaded = new List<string>();
         internal static List<string> pawnKindDefsExcluded = new List<string>();
+        internal static List<FactionDef> factionsWithHumanlikesLoaded = new List<FactionDef>();
         internal static Dictionary<string, string> pawnKindRaceDefRelations = new Dictionary<string, string>();
         internal class PrevKindSettings
         {

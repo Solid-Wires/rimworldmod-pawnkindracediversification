@@ -7,6 +7,8 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 using PawnkindRaceDiversification.UI;
+using static PawnkindRaceDiversification.Data.GeneralLoadingDatabase;
+using System.Linq;
 
 namespace PawnkindRaceDiversification.Handlers
 {
@@ -17,6 +19,7 @@ namespace PawnkindRaceDiversification.Handlers
         internal static SettingHandle<bool> OverrideAllAlienPawnkinds = null;
         internal static bool OverrideAllAlienPawnkindsFromStartingPawns = false;
         internal static SettingHandle<bool> OverridePawnsWithInconsistentAges = null;
+        internal static Dictionary<string, SettingHandle<bool>> excludedFactions = new Dictionary<string, SettingHandle<bool>>();
         internal static Dictionary<string, float> setFlatWeights = new Dictionary<string, float>();
         internal static Dictionary<string, float> setLocalFlatWeights = new Dictionary<string, float>();
         internal static Dictionary<string, float> setLocalWorldWeights = new Dictionary<string, float>();
@@ -33,6 +36,8 @@ namespace PawnkindRaceDiversification.Handlers
             OverrideAllAlienPawnkinds = pack.GetHandle("OverrideAllAlienPawnkinds", Translator.Translate("PawnkindRaceDiversity_OverrideAllAlienPawnkinds_label"), Translator.Translate("PawnkindRaceDiversity_OverrideAllAlienPawnkinds_description"), false);
             OverridePawnsWithInconsistentAges = pack.GetHandle("OverridePawnsWithInconsistentAges", Translator.Translate("PawnkindRaceDiversity_OverridePawnsWithInconsistentAges_label"), Translator.Translate("PawnkindRaceDiversity_OverridePawnsWithInconsistentAges_description"), false);
 
+            //Excluded factions
+            ConstructOtherAdjustmentHandles(pack, "RaceOverrideExcludedFaction", (from def in factionsWithHumanlikesLoaded select def.defName).ToList(), ref excludedFactions, false, false);
             //Global weights
             ConstructRaceAdjustmentHandles(pack, HandleContext.GENERAL);
             //Per-world weights
@@ -43,6 +48,16 @@ namespace PawnkindRaceDiversification.Handlers
             ConstructRaceAdjustmentHandles(pack, HandleContext.LOCAL);
 
             //Settings category buttons construction
+            //Excluded factions
+            this.SettingsButtonCategoryConstructor(pack,
+                "PawnkindRaceDiversity_FactionExclusionWindowTitle",
+                showSettingsValid,
+                "PawnkindRaceDiversity_FactionExclusionWindowDescription",
+                delegate
+                {
+                    Find.WindowStack.Add(new FactionExclusionWindow());
+                });
+            //----Weights related----
             //Flat weights
             this.SettingsButtonCategoryConstructor(pack,
                 "PawnkindRaceDiversity_WeightWindowTitle_FlatWeights", 
@@ -153,6 +168,20 @@ namespace PawnkindRaceDiversification.Handlers
                     }
                 }
                 allHandleReferences.Add(handle);
+            }
+        }
+
+        //Construct other list-related handles
+        private void ConstructOtherAdjustmentHandles(ModSettingsPack pack, string handleName, List<string> elements, ref Dictionary<string, SettingHandle<bool>> handleDict, bool defaultValue, bool unsaved)
+        {
+            foreach (string defName in elements)
+            {
+                //Handle configuration
+                string id = handleName + "_" + defName;
+                SettingHandle<bool> handle = pack.GetHandle<bool>(id, defName, null, defaultValue, null);
+                handle.Unsaved = unsaved;
+                handle.NeverVisible = true; //Never visible because it is handled by custom GUI instead
+                handleDict.Add(defName, handle);
             }
         }
 

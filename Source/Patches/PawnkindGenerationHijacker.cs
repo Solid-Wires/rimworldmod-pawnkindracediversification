@@ -30,12 +30,13 @@ namespace PawnkindRaceDiversification.Patches
                 *  1.) kindDef isn't null
                 *  2.) kindDef is a humanlike
                 *  3.) kindDef isn't an excluded kind def
-                *  4.) raceDef isn't an implied race (pawnmorpher compatibility)
-                *  5.) The weight generator isn't paused
-                *  6.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
-                *  7.) Prepare Carefully isn't doing anything
-                *  8.) The age of this request is consistent with the age of the race
-                *  9.) Validator is checking if this request is valid at all from the above statements
+                *  4.) faction is excluded from the list of factions blacklisted from being overridden
+                *  5.) raceDef isn't an implied race (pawnmorpher compatibility)
+                *  6.) The weight generator isn't paused
+                *  7.) faction isn't the pawnmorpher factions (pawnmorpher compatibility)
+                *  8.) Prepare Carefully isn't doing anything
+                *  9.) The age of this request is consistent with the age of the race
+                *  10.) Validator is checking if this request is valid at all from the above statements
                 *       OR OTHERWISE:
                 *           kindDef is human and settings want to override all human pawnkinds
                 *               OR kindDef is not a human and settings want to override all alien pawnkinds
@@ -45,6 +46,8 @@ namespace PawnkindRaceDiversification.Patches
                 && (request.KindDef.RaceProps != null
                     && request.KindDef.RaceProps.Humanlike)
                 && !(pawnKindDefsExcluded.Contains(request.KindDef.defName))
+                && !((request.Faction != null && factionsWithHumanlikesLoaded.Contains(request.Faction.def))
+                    && (ModSettingsHandler.excludedFactions.ContainsKey(request.Faction.def.defName) && ModSettingsHandler.excludedFactions[request.Faction.def.defName]))
                 && !(impliedRacesLoaded.Contains(request.KindDef.race.defName))
                 && !(weightGeneratorPaused)
                 && !(request.Faction != null && (request.Faction.def.defName == "PawnmorpherPlayerColony" || request.Faction.def.defName == "PawnmorpherEnclave"))

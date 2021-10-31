@@ -21,7 +21,7 @@ namespace PawnkindRaceDiversification
     public class PawnkindRaceDiversification : ModBase
     {
         internal static PawnkindRaceDiversification Instance { get; private set; }
-        internal static int versionID = 34;
+        internal static int versionID = 35;
         internal static Harmony harmony => new Harmony("SEW_PRD_Harmony");
         internal ModSettingsHandler SettingsHandler { get; private set; }
         internal static List<SeekedMod> activeSeekedMods = new List<SeekedMod>();
@@ -224,6 +224,10 @@ namespace PawnkindRaceDiversification
                 {
                     //Backstory database for factions
                     defaultFactionBackstorySettings.Add(def.defName, def.backstoryFilters);
+
+                    //Add this to the list of humanlike factions if humanlike and not a player.
+                    if (def.humanlikeFaction && !def.isPlayer)
+                        factionsWithHumanlikesLoaded.Add(def);
                 }
 
                 SettingsHandler = new ModSettingsHandler();
